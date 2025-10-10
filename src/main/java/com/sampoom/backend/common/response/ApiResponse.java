@@ -10,8 +10,9 @@ import org.springframework.http.ResponseEntity;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {
 
-    private final int status;
-    private final boolean success;
+    private final Integer status;
+    private final Boolean success;
+    private final Integer code;
     private final String message;
     private T data;
 
@@ -46,6 +47,14 @@ public class ApiResponse<T> {
         return ApiResponse.<Void>builder()
                 .status(status)
                 .success(false)
+                .message(message)
+                .build();
+    }
+
+    // 새로운 에러 응답 형식을 위한 메서드 추가
+    public static ApiResponse<Void> errorWithCode(int code, String message) {
+        return ApiResponse.<Void>builder()
+                .code(code)
                 .message(message)
                 .build();
     }

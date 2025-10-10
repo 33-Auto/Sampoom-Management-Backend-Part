@@ -15,7 +15,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BaseException.class)
     public ResponseEntity<ApiResponse<?>> handleBaseException(BaseException e) {
         return ResponseEntity.status(e.getStatusCode())
-                .body(ApiResponse.fail(e.getStatusCode(), e.getResponseMessage()));
+                .body(ApiResponse.errorWithCode(e.getErrorCode(), e.getResponseMessage()));
     }
 
     @ExceptionHandler(RuntimeException.class)
@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
         log.error(e.getMessage(), e);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.fail(HttpStatus.INTERNAL_SERVER_ERROR.value(), "런타임 오류가 발생했습니다."));
+                .body(ApiResponse.errorWithCode(20500, "런타임 오류가 발생했습니다."));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -31,7 +31,7 @@ public class GlobalExceptionHandler {
         String errorMessage = e.getBindingResult().getAllErrors().get(0).getDefaultMessage();
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.fail(HttpStatus.BAD_REQUEST.value(), errorMessage));
+                .body(ApiResponse.errorWithCode(20000, errorMessage));
     }
 
 }
