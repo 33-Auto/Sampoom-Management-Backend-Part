@@ -31,6 +31,14 @@ public class Part extends BaseTimeEntity {
     @JoinColumn(name = "group_id", nullable = false)
     private PartGroup partGroup; // PartGroup 엔티티와 N:1 관계
 
+    // CSV 로더가 사용할 생성자
+    public Part(String code, String name, PartGroup partGroup) {
+        this.code = code;
+        this.name = name;
+        this.partGroup = partGroup;
+        this.status = PartStatus.ACTIVE;
+    }
+
     // 생성 메서드
     public static Part create(PartCreateRequestDTO partCreateRequestDTO, PartGroup partGroup) {
         Part part = new Part();

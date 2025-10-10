@@ -18,4 +18,10 @@ public class Category extends BaseTimeEntity {
     private String name;
 
     private String code;
+
+    // CSV 로더가 사용할 생성자
+    public Category(String code, String name) {
+        this.code = code;
+        this.name = name;
+    }
 }
