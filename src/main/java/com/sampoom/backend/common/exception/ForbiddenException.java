@@ -1,5 +1,6 @@
 package com.sampoom.backend.common.exception;
 
+import com.sampoom.backend.common.response.ErrorStatus;
 import org.springframework.http.HttpStatus;
 
 public class ForbiddenException extends BaseException {
@@ -9,5 +10,9 @@ public class ForbiddenException extends BaseException {
 
   public ForbiddenException(String message) {
     super(HttpStatus.FORBIDDEN, message);
+  }
+
+  public ForbiddenException(ErrorStatus errorStatus) {
+      super(errorStatus.getHttpStatus(), errorStatus.getMessage(), errorStatus.getCode());
   }
 }
