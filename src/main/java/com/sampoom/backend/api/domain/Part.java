@@ -22,7 +22,6 @@ public class Part extends BaseTimeEntity {
 
     private String name; // 부품명
 
-    private String description; // 설명
 
     @Enumerated(EnumType.STRING)
     private PartStatus status;  // 단종
@@ -44,7 +43,6 @@ public class Part extends BaseTimeEntity {
         Part part = new Part();
         part.code = partCreateRequestDTO.getCode();
         part.name = partCreateRequestDTO.getName();
-        part.description = partCreateRequestDTO.getDescription();
         part.partGroup = partGroup; // 연관관계 설정
         part.status = PartStatus.ACTIVE;
 
@@ -56,10 +54,6 @@ public class Part extends BaseTimeEntity {
         // 이름이 null이 아닐 경우에만 수정
         if (partUpdateRequestDTO.getName() != null) {
             this.name = partUpdateRequestDTO.getName();
-        }
-        // 설명이 null이 아닐 경우에만 수정
-        if (partUpdateRequestDTO.getDescription() != null) {
-            this.description = partUpdateRequestDTO.getDescription();
         }
     }
 
