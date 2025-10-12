@@ -94,6 +94,7 @@ jobs:
             sudo docker stop part-service || true
             sudo docker rm part-service || true
             sudo docker run -d --name part-service -p 8080:8080 \
+              -e SPRING_APPLICATION_JSON='{"server":{"address":"0.0.0.0","port":8080}}' \
               -e SPRING_DATASOURCE_URL=jdbc:postgresql://3.38.218.173:5432/mydb \
               -e SPRING_DATASOURCE_USERNAME=myuser \
               -e SPRING_DATASOURCE_PASSWORD=mypassword \
