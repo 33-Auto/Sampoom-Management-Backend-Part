@@ -19,6 +19,4 @@ public class PartCreateRequestDTO {
 
     @NotBlank(message = "부품 이름은 필수입니다.")
     private String name;
-
-    private String description;
 }

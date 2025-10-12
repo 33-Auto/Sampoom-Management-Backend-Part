@@ -11,7 +11,6 @@ import lombok.Setter;
 public class PartUpdateRequestDTO {
 
     private String name;
-    private String description;
     private PartStatus status;
 
     public void update(PartUpdateRequestDTO partUpdateRequestDTO) {
