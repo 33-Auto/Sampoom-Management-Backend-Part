@@ -89,6 +89,7 @@ jobs:
           key: ${{ secrets.SAMPOOM_KEY }}
           script: |
             echo "배포 시작..."
+            sudo docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
             sudo docker pull hysungzzang/sampoom:part-latest
             sudo docker stop part-service || true
             sudo docker rm part-service || true
