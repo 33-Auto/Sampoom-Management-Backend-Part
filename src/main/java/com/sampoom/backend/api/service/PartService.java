@@ -100,4 +100,13 @@ public class PartService {
                 .map(PartResponseDTO::new)
                 .collect(Collectors.toList());
     }
+
+    // 단일 부품 조회
+    @Transactional
+    public PartResponseDTO findPartById(Long partId) {
+        Part part = partRepository.findById(partId)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.PART_NOT_FOUND.getMessage()));
+
+        return new PartResponseDTO(part);
+    }
 }
