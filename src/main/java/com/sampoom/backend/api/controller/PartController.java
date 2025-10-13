@@ -88,4 +88,12 @@ public class PartController {
 
         return ApiResponse.success(SuccessStatus.PART_SEARCH_SUCCESS, partList);
     }
+
+    @Operation(summary = "단일 부품 조회", description = "부품 ID로 부품 상세 정보를 조회합니다.")
+    @GetMapping("/{partId}")
+    public ResponseEntity<ApiResponse<PartResponseDTO>> getPartById(@PathVariable Long partId) {
+        PartResponseDTO partResponse = partService.findPartById(partId);
+        return ApiResponse.success(SuccessStatus.PART_DETAIL_SUCCESS, partResponse);
+    }
+
 }
