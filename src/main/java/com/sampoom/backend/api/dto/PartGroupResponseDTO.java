@@ -8,9 +8,11 @@ public class PartGroupResponseDTO {
 
     private Long groupId;
     private String name;
+    private Long categoryId;
 
     public PartGroupResponseDTO(PartGroup partGroup) {
         this.groupId = partGroup.getId();
         this.name = partGroup.getName();
+        this.categoryId = partGroup.getCategory().getId();
     }
 }
