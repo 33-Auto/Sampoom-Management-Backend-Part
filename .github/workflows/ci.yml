@@ -78,3 +78,25 @@ jobs:
           tags: |
             ${{ steps.vars.outputs.IMAGE }}:${{ steps.vars.outputs.TAG_VERSION }}
             ${{ steps.vars.outputs.IMAGE }}:${{ steps.vars.outputs.TAG_LATEST }}
+            
+
+      # EC2 자동 배포
+      - name: Deploy to EC2 (Part)
+        uses: appleboy/ssh-action@master
+        with:
+          host: 3.38.218.173
+          username: ubuntu
+          key: ${{ secrets.SAMPOOM_KEY }}
+          script: |
+            echo "배포 시작..."
+            sudo docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
+            sudo docker pull hysungzzang/sampoom:part-latest
+            sudo docker stop part-service || true
+            sudo docker rm part-service || true
+            sudo docker run -d --name part-service -p 8080:8080 \
+              -e SPRING_APPLICATION_JSON='{"server":{"address":"0.0.0.0","port":8080}}' \
+              -e SPRING_DATASOURCE_URL=jdbc:postgresql://3.38.218.173:5432/mydb \
+              -e SPRING_DATASOURCE_USERNAME=myuser \
+              -e SPRING_DATASOURCE_PASSWORD=mypassword \
+              hysungzzang/sampoom:part-latest
+            echo "배포 완료!"

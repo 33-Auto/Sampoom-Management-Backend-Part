@@ -39,6 +39,8 @@ dependencies {
 
     // PostgreSQL 드라이버
     runtimeOnly 'org.postgresql:postgresql'
+
+    implementation 'com.opencsv:opencsv:5.7.1'
 }
 
 tasks.named('test') {
