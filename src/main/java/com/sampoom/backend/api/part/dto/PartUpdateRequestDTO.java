@@ -12,11 +12,4 @@ public class PartUpdateRequestDTO {
 
     private String name;
     private PartStatus status;
-
-    public void update(PartUpdateRequestDTO partUpdateRequestDTO) {
-
-        if (partUpdateRequestDTO.getStatus() != null) {
-            this.status = partUpdateRequestDTO.getStatus();
-        }
-    }
 }

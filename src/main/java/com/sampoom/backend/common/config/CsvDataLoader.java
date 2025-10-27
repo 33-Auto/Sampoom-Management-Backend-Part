@@ -1,10 +1,10 @@
 package com.sampoom.backend.common.config;
 
 import com.opencsv.CSVReader;
-import com.sampoom.backend.api.part.entity.Category;
+import com.sampoom.backend.api.part.entity.PartCategory;
 import com.sampoom.backend.api.part.entity.Part;
-import com.sampoom.backend.api.part.entity.Group;
-import com.sampoom.backend.api.part.repository.CategoryRepository;
+import com.sampoom.backend.api.part.entity.PartGroup;
+import com.sampoom.backend.api.part.repository.PartCategoryRepository;
 import com.sampoom.backend.api.part.repository.PartGroupRepository;
 import com.sampoom.backend.api.part.repository.PartRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CsvDataLoader implements CommandLineRunner {
 
-    private final CategoryRepository categoryRepository;
+    private final PartCategoryRepository categoryRepository;
     private final PartGroupRepository partGroupRepository;
     private final PartRepository partRepository;
 
@@ -49,16 +49,16 @@ public class CsvDataLoader implements CommandLineRunner {
             reader.readNext();  // 헤더 행 건너뛰기
 
             String[] line;
-            Map<String, Category> categoryCache = new HashMap<>();
-            Map<String, Group> groupCache = new HashMap<>();
+            Map<String, PartCategory> categoryCache = new HashMap<>();
+            Map<String, PartGroup> groupCache = new HashMap<>();
 
             while ((line = reader.readNext()) != null) {
                 final String[] currentLine = line;
 
                 String categoryCode = currentLine[CATEGORY_CODE];
-                Category category = categoryCache.computeIfAbsent(categoryCode, code ->
+                PartCategory category = categoryCache.computeIfAbsent(categoryCode, code ->
                         categoryRepository.findByCode(code).orElseGet(() ->
-                                categoryRepository.save(new Category(code, currentLine[CATEGORY_NAME]))
+                                categoryRepository.save(new PartCategory(code, currentLine[CATEGORY_NAME]))
                         )
                 );
 
@@ -66,9 +66,9 @@ public class CsvDataLoader implements CommandLineRunner {
 
                 String compositeGroupKey = categoryCode + "-" + groupCode;  // 그룹코드만 하면 중복되니깐 '카테고리코드-그룹코드'
 
-                Group partGroup = groupCache.computeIfAbsent(compositeGroupKey, key ->
+                PartGroup partGroup = groupCache.computeIfAbsent(compositeGroupKey, key ->
                         partGroupRepository.findByCodeAndCategory(groupCode, category).orElseGet(() ->
-                                partGroupRepository.save(new Group(groupCode, currentLine[GROUP_NAME], category))
+                                partGroupRepository.save(new PartGroup(groupCode, currentLine[GROUP_NAME], category))
                         )
                 );
 

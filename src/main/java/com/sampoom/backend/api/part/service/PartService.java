@@ -1,16 +1,19 @@
 package com.sampoom.backend.api.part.service;
 
 import com.sampoom.backend.api.part.dto.*;
-import com.sampoom.backend.api.part.entity.Category;
+import com.sampoom.backend.api.part.entity.PartCategory;
 import com.sampoom.backend.api.part.entity.Part;
-import com.sampoom.backend.api.part.entity.Group;
+import com.sampoom.backend.api.part.entity.PartGroup;
 import com.sampoom.backend.api.part.entity.PartStatus;
-import com.sampoom.backend.api.part.repository.CategoryRepository;
+import com.sampoom.backend.api.part.repository.PartCategoryRepository;
 import com.sampoom.backend.api.part.repository.PartGroupRepository;
 import com.sampoom.backend.api.part.repository.PartRepository;
+import com.sampoom.backend.common.dto.PageResponseDTO;
 import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,66 +26,95 @@ public class PartService {
 
     private final PartRepository partRepository;
     private final PartGroupRepository partGroupRepository;
-    private final CategoryRepository categoryRepository;
+    private final PartCategoryRepository categoryRepository;
 
     // 카테고리 목록 조회
     @Transactional
-    public List<CategoryResponseDTO> findAllCategories() {
+    public List<PartCategoryResponseDTO> findAllCategories() {
 
-        List<Category> categories = categoryRepository.findAll();
+        List<PartCategory> categories = categoryRepository.findAll();
 
         return categories.stream()
-                .map(CategoryResponseDTO::new)
+                .map(PartCategoryResponseDTO::new)
                 .collect(Collectors.toList());
     }
 
-    // 카테고리에 속한 그룹 목록 조회
+    // 카테고리별 그룹 목록 조회
     @Transactional
     public List<PartGroupResponseDTO> findGroupsByCategoryId(Long categoryId) {
 
-        List<Group> partGroups = partGroupRepository.findByCategoryId(categoryId);
+        List<PartGroup> partGroups = partGroupRepository.findByCategoryId(categoryId);
 
         return partGroups.stream()
                 .map(PartGroupResponseDTO::new)
                 .collect(Collectors.toList());
     }
 
+    // 카테고리에 속한 모든 그룹 부품 목록 조회
+    @Transactional(readOnly = true)
+    public PageResponseDTO<PartListResponseDTO> findAllPartsByCategory(Long categoryId, int page, int size) {
 
-    // 특정 그룹에 속한 부품 목록 조회
-    @Transactional
-    public List<PartResponseDTO> findPartsByGroupId(Long groupId) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Page<Part> partsPage = partRepository.findByPartGroupCategoryIdAndStatus(categoryId, PartStatus.ACTIVE, pageRequest);
 
-        List<Part> parts = partRepository.findByPartGroupIdAndStatus(groupId, PartStatus.ACTIVE);
+        List<PartListResponseDTO> dtoList = partsPage.getContent().stream()
+                .map(PartListResponseDTO::new)
+                .toList();
 
-        return parts.stream()
-                .map(PartResponseDTO::new)
-                .collect(Collectors.toList());
+        return PageResponseDTO.<PartListResponseDTO>builder()
+                .content(dtoList)
+                .totalElements(partsPage.getTotalElements())
+                .totalPages(partsPage.getTotalPages())
+                .currentPage(page)
+                .pageSize(size)
+                .build();
     }
 
-    // 신규 부품 생성
+    // 그룹별 부품 목록 조회
     @Transactional
-    public PartResponseDTO createPart(PartCreateRequestDTO partCreateRequestDTO) {
+    public PageResponseDTO<PartListResponseDTO> findPartsByGroup(Long groupId, int page, int size) {
+
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Page<Part> parts = partRepository.findByPartGroupId(groupId, pageRequest);
+
+        List<PartListResponseDTO> dtoList = parts.stream().map(PartListResponseDTO::new).toList();
+        return PageResponseDTO.<PartListResponseDTO>builder()
+                .content(dtoList)
+                .totalElements(parts.getTotalElements())
+                .totalPages(parts.getTotalPages())
+                .currentPage(page)
+                .pageSize(size)
+                .build();
+    }
+
+    // 신규 부품 등록
+    @Transactional
+    public PartListResponseDTO createPart(PartCreateRequestDTO partCreateRequestDTO) {
 
         // DTO에 담겨온 groupId로 PartGroup 엔티티 조회
-        Group partGroup = partGroupRepository.findById(partCreateRequestDTO.getGroupId())
-                .orElseThrow(() -> new NotFoundException(ErrorStatus.GROUP_NOT_FOUND.getMessage()));
+        PartGroup partGroup = partGroupRepository.findById(partCreateRequestDTO.getGroupId())
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.GROUP_NOT_FOUND));
 
-        Part newPart = Part.create(partCreateRequestDTO, partGroup);
+        // 코드 자동 생성
+        String nextCode = generateNextPartCode(partGroup.getId());
+
+        Part newPart = new Part(nextCode, partCreateRequestDTO.getName(), partGroup);
+
         partRepository.save(newPart);
 
-        return new PartResponseDTO(newPart);
+        return new PartListResponseDTO(newPart);
     }
 
     // 부품 수정
     @Transactional
-    public PartResponseDTO updatePart(Long partId, PartUpdateRequestDTO partUpdateRequestDTO) {
+    public PartListResponseDTO updatePart(Long partId, PartUpdateRequestDTO partUpdateRequestDTO) {
         // 수정할 부품을 조회
         Part part = partRepository.findById(partId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.PART_NOT_FOUND.getMessage()));
 
         part.update(partUpdateRequestDTO);
 
-        return new PartResponseDTO(part);
+        return new PartListResponseDTO(part);
     }
 
     // 부품 삭제
@@ -91,28 +123,57 @@ public class PartService {
 
         // 삭제할 부품 조회
         Part part = partRepository.findById(partId)
-                .orElseThrow(() -> new NotFoundException(ErrorStatus.PART_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.PART_NOT_FOUND));
 
-        part.delete();
+        partRepository.delete(part);
     }
 
     // 부품 검색
     @Transactional
-    public List<PartResponseDTO> searchParts(String keyword) {
+    public PageResponseDTO<PartListResponseDTO> searchParts(String keyword, int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
 
-        List<Part> parts = partRepository.searchByKeyword(keyword);
+        Page<Part> parts = partRepository.findByNameContainingIgnoreCaseOrCodeContainingIgnoreCaseAndStatus(
+                keyword, keyword, PartStatus.ACTIVE, pageRequest
+        );
 
-        return  parts.stream()
-                .map(PartResponseDTO::new)
-                .collect(Collectors.toList());
+        List<PartListResponseDTO> dtoList = parts.getContent().stream()
+                .map(PartListResponseDTO::new)
+                .toList();
+
+        return PageResponseDTO.<PartListResponseDTO>builder()
+                .content(dtoList)
+                .totalElements(parts.getTotalElements())
+                .totalPages(parts.getTotalPages())
+                .currentPage(page)
+                .pageSize(size)
+                .build();
     }
 
-    // 단일 부품 조회
-    @Transactional
-    public PartResponseDTO findPartById(Long partId) {
-        Part part = partRepository.findById(partId)
-                .orElseThrow(() -> new NotFoundException(ErrorStatus.PART_NOT_FOUND.getMessage()));
+    // 코드 생성
+    @Transactional(readOnly = true)
+    public String generateNextPartCode(Long groupId) {
 
-        return new PartResponseDTO(part);
+        PartGroup group = partGroupRepository.findById(groupId)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.GROUP_NOT_FOUND));
+
+        String categoryCode = group.getCategory().getCode(); // ENG, TRM 등
+        String groupCode = String.format("%02d", group.getId()); // 그룹 ID 두 자리로 포맷
+
+        // 최신 부품 코드 조회 (code 순 정렬 기준)
+        Part latest = partRepository.findTopByPartGroupIdOrderByCodeDesc(groupId);
+
+        int nextSeq = 1;
+        if (latest != null && latest.getCode() != null) {
+            String[] parts = latest.getCode().split("-");
+            if (parts.length == 3) {
+                try {
+                    nextSeq = Integer.parseInt(parts[2]) + 1;
+                } catch (NumberFormatException ignored) {}
+            }
+        }
+
+        return String.format("%s-%s-%03d", categoryCode, groupCode, nextSeq);
     }
+
 }

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @Table(name = "part_group")
-public class Group extends BaseTimeEntity {
+public class PartGroup extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,10 +21,10 @@ public class Group extends BaseTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
-    private Category category; // Category 엔티티와 N:1 관계
+    private PartCategory category; // Category 엔티티와 N:1 관계
 
     // CSV 로더가 사용할 생성자
-    public Group(String code, String name, Category category) {
+    public PartGroup(String code, String name, PartCategory category) {
         this.code = code;
         this.name = name;
         this.category = category;

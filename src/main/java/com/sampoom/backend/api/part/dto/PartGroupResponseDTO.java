@@ -1,18 +1,20 @@
 package com.sampoom.backend.api.part.dto;
 
-import com.sampoom.backend.api.part.entity.Group;
+import com.sampoom.backend.api.part.entity.PartGroup;
 import lombok.Getter;
 
 @Getter
 public class PartGroupResponseDTO {
 
     private Long groupId;
-    private String name;
+    private String groupName;
     private Long categoryId;
+    private String categoryName;
 
-    public PartGroupResponseDTO(Group partGroup) {
+    public PartGroupResponseDTO(PartGroup partGroup) {
         this.groupId = partGroup.getId();
-        this.name = partGroup.getName();
+        this.groupName = partGroup.getName();
         this.categoryId = partGroup.getCategory().getId();
+        this.categoryName = partGroup.getCategory().getName();
     }
 }

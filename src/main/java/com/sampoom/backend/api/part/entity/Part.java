@@ -28,25 +28,14 @@ public class Part extends BaseTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id", nullable = false)
-    private Group partGroup; // PartGroup 엔티티와 N:1 관계
+    private PartGroup partGroup; // PartGroup 엔티티와 N:1 관계
 
     // CSV 로더가 사용할 생성자
-    public Part(String code, String name, Group partGroup) {
+    public Part(String code, String name, PartGroup partGroup) {
         this.code = code;
         this.name = name;
         this.partGroup = partGroup;
         this.status = PartStatus.ACTIVE;
-    }
-
-    // 생성 메서드
-    public static Part create(PartCreateRequestDTO partCreateRequestDTO, Group partGroup) {
-        Part part = new Part();
-        part.code = partCreateRequestDTO.getCode();
-        part.name = partCreateRequestDTO.getName();
-        part.partGroup = partGroup; // 연관관계 설정
-        part.status = PartStatus.ACTIVE;
-
-        return part;
     }
 
     // 수정 메서드
