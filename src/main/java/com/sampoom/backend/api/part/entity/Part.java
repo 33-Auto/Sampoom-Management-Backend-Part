@@ -1,7 +1,7 @@
-package com.sampoom.backend.api.domain;
+package com.sampoom.backend.api.part.entity;
 
-import com.sampoom.backend.api.dto.PartCreateRequestDTO;
-import com.sampoom.backend.api.dto.PartUpdateRequestDTO;
+import com.sampoom.backend.api.part.dto.PartCreateRequestDTO;
+import com.sampoom.backend.api.part.dto.PartUpdateRequestDTO;
 import com.sampoom.backend.common.entitiy.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "part")
+@Table(name = "part_master")
 public class Part extends BaseTimeEntity {
 
     @Id
@@ -28,10 +28,10 @@ public class Part extends BaseTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id", nullable = false)
-    private PartGroup partGroup; // PartGroup 엔티티와 N:1 관계
+    private Group partGroup; // PartGroup 엔티티와 N:1 관계
 
     // CSV 로더가 사용할 생성자
-    public Part(String code, String name, PartGroup partGroup) {
+    public Part(String code, String name, Group partGroup) {
         this.code = code;
         this.name = name;
         this.partGroup = partGroup;
@@ -39,7 +39,7 @@ public class Part extends BaseTimeEntity {
     }
 
     // 생성 메서드
-    public static Part create(PartCreateRequestDTO partCreateRequestDTO, PartGroup partGroup) {
+    public static Part create(PartCreateRequestDTO partCreateRequestDTO, Group partGroup) {
         Part part = new Part();
         part.code = partCreateRequestDTO.getCode();
         part.name = partCreateRequestDTO.getName();

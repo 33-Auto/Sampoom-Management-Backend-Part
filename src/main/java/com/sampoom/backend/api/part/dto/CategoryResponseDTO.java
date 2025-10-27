@@ -1,6 +1,6 @@
-package com.sampoom.backend.api.dto;
+package com.sampoom.backend.api.part.dto;
 
-import com.sampoom.backend.api.domain.Category;
+import com.sampoom.backend.api.part.entity.Category;
 import lombok.Getter;
 
 @Getter

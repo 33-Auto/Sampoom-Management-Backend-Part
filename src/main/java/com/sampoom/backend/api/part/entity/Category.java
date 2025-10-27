@@ -1,4 +1,4 @@
-package com.sampoom.backend.api.domain;
+package com.sampoom.backend.api.part.entity;
 
 import com.sampoom.backend.common.entitiy.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "category")
+@Table(name = "part_category")
 public class Category extends BaseTimeEntity {
 
     @Id

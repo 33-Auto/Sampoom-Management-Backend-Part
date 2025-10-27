@@ -1,7 +1,13 @@
-package com.sampoom.backend.api.service;
+package com.sampoom.backend.api.part.service;
 
-import com.sampoom.backend.api.domain.*;
-import com.sampoom.backend.api.dto.*;
+import com.sampoom.backend.api.part.dto.*;
+import com.sampoom.backend.api.part.entity.Category;
+import com.sampoom.backend.api.part.entity.Part;
+import com.sampoom.backend.api.part.entity.Group;
+import com.sampoom.backend.api.part.entity.PartStatus;
+import com.sampoom.backend.api.part.repository.CategoryRepository;
+import com.sampoom.backend.api.part.repository.PartGroupRepository;
+import com.sampoom.backend.api.part.repository.PartRepository;
 import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +40,7 @@ public class PartService {
     @Transactional
     public List<PartGroupResponseDTO> findGroupsByCategoryId(Long categoryId) {
 
-        List<PartGroup> partGroups = partGroupRepository.findByCategoryId(categoryId);
+        List<Group> partGroups = partGroupRepository.findByCategoryId(categoryId);
 
         return partGroups.stream()
                 .map(PartGroupResponseDTO::new)
@@ -58,7 +64,7 @@ public class PartService {
     public PartResponseDTO createPart(PartCreateRequestDTO partCreateRequestDTO) {
 
         // DTO에 담겨온 groupId로 PartGroup 엔티티 조회
-        PartGroup partGroup = partGroupRepository.findById(partCreateRequestDTO.getGroupId())
+        Group partGroup = partGroupRepository.findById(partCreateRequestDTO.getGroupId())
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.GROUP_NOT_FOUND.getMessage()));
 
         Part newPart = Part.create(partCreateRequestDTO, partGroup);

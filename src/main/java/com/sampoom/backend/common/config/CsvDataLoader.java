@@ -1,7 +1,12 @@
 package com.sampoom.backend.common.config;
 
-import com.sampoom.backend.api.domain.*;
 import com.opencsv.CSVReader;
+import com.sampoom.backend.api.part.entity.Category;
+import com.sampoom.backend.api.part.entity.Part;
+import com.sampoom.backend.api.part.entity.Group;
+import com.sampoom.backend.api.part.repository.CategoryRepository;
+import com.sampoom.backend.api.part.repository.PartGroupRepository;
+import com.sampoom.backend.api.part.repository.PartRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
@@ -45,7 +50,7 @@ public class CsvDataLoader implements CommandLineRunner {
 
             String[] line;
             Map<String, Category> categoryCache = new HashMap<>();
-            Map<String, PartGroup> groupCache = new HashMap<>();
+            Map<String, Group> groupCache = new HashMap<>();
 
             while ((line = reader.readNext()) != null) {
                 final String[] currentLine = line;
@@ -61,9 +66,9 @@ public class CsvDataLoader implements CommandLineRunner {
 
                 String compositeGroupKey = categoryCode + "-" + groupCode;  // 그룹코드만 하면 중복되니깐 '카테고리코드-그룹코드'
 
-                PartGroup partGroup = groupCache.computeIfAbsent(compositeGroupKey, key ->
+                Group partGroup = groupCache.computeIfAbsent(compositeGroupKey, key ->
                         partGroupRepository.findByCodeAndCategory(groupCode, category).orElseGet(() ->
-                                partGroupRepository.save(new PartGroup(groupCode, currentLine[GROUP_NAME], category))
+                                partGroupRepository.save(new Group(groupCode, currentLine[GROUP_NAME], category))
                         )
                 );
 

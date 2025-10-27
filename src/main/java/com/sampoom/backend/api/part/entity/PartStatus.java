@@ -1,4 +1,4 @@
-package com.sampoom.backend.api.domain;
+package com.sampoom.backend.api.part.entity;
 
 public enum PartStatus {
     ACTIVE,  // 판매중

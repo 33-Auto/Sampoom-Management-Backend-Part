@@ -1,5 +1,7 @@
-package com.sampoom.backend.api.domain;
+package com.sampoom.backend.api.part.repository;
 
+import com.sampoom.backend.api.part.entity.PartStatus;
+import com.sampoom.backend.api.part.entity.Part;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

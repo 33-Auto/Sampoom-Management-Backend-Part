@@ -1,6 +1,6 @@
-package com.sampoom.backend.api.dto;
+package com.sampoom.backend.api.part.dto;
 
-import com.sampoom.backend.api.domain.PartStatus;
+import com.sampoom.backend.api.part.entity.PartStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

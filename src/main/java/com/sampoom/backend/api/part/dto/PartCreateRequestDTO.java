@@ -1,4 +1,4 @@
-package com.sampoom.backend.api.dto;
+package com.sampoom.backend.api.part.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
