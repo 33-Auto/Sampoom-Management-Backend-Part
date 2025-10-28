@@ -110,7 +110,7 @@ public class PartService {
     public PartListResponseDTO updatePart(Long partId, PartUpdateRequestDTO partUpdateRequestDTO) {
         // 수정할 부품을 조회
         Part part = partRepository.findById(partId)
-                .orElseThrow(() -> new NotFoundException(ErrorStatus.PART_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.PART_NOT_FOUND));
 
         part.update(partUpdateRequestDTO);
 
@@ -133,9 +133,7 @@ public class PartService {
     public PageResponseDTO<PartListResponseDTO> searchParts(String keyword, int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size);
 
-        Page<Part> parts = partRepository.findByNameContainingIgnoreCaseOrCodeContainingIgnoreCaseAndStatus(
-                keyword, keyword, PartStatus.ACTIVE, pageRequest
-        );
+        Page<Part> parts = partRepository.searchActive(keyword, PartStatus.ACTIVE, pageRequest);
 
         List<PartListResponseDTO> dtoList = parts.getContent().stream()
                 .map(PartListResponseDTO::new)

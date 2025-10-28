@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
 
 public interface PartRepository extends JpaRepository<Part, Long> {
 
@@ -22,6 +21,14 @@ public interface PartRepository extends JpaRepository<Part, Long> {
             PartStatus status,
             Pageable pageable
     );
+
+    @Query("""
+select p from Part p
+where p.status = :status
+  and (lower(p.name) like lower(concat('%', :kw, '%'))
+       or lower(p.code) like lower(concat('%', :kw, '%')))
+""")
+    Page<Part> searchActive(@Param("kw") String kw, @Param("status") PartStatus status, Pageable pageable);
 
     // 그룹별 부품 조회
     Page<Part> findByPartGroupId(Long groupId, Pageable pageable);

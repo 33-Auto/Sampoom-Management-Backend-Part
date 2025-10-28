@@ -9,6 +9,7 @@ import com.sampoom.backend.common.response.ApiResponse;
 import com.sampoom.backend.common.response.SuccessStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +24,7 @@ public class BomController {
 
     @Operation(summary = "BOM 추가", description = "새로운 BOM을 등록합니다.")
     @PostMapping
-    public ResponseEntity<ApiResponse<BomResponseDTO>> createOrUpdateBom(@RequestBody BomRequestDTO bomRequestDTO) {
+    public ResponseEntity<ApiResponse<BomResponseDTO>> createOrUpdateBom(@Valid @RequestBody BomRequestDTO bomRequestDTO) {
         return ApiResponse.success(SuccessStatus.CREATED, bomService.createOrUpdateBom(bomRequestDTO));
     }
 
@@ -47,7 +48,7 @@ public class BomController {
     @PutMapping("/{bomId}")
     public ResponseEntity<ApiResponse<BomResponseDTO>> updateBom(
             @PathVariable Long bomId,
-            @RequestBody BomRequestDTO bomRequestDTO) {
+            @Valid @RequestBody BomRequestDTO bomRequestDTO) {
         return ApiResponse.success(SuccessStatus.OK, bomService.updateBom(bomId, bomRequestDTO));
     }
 

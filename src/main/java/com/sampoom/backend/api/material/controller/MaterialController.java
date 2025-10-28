@@ -71,4 +71,16 @@ public class MaterialController {
         materialService.deleteMaterial(id);
         return ApiResponse.success_only(SuccessStatus.OK);
     }
+
+    @Operation(summary = "자재 검색", description = "자재 이름 또는 코드로 검색합니다.")
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<PageResponseDTO<MaterialResponseDTO>>> searchMaterials(
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        PageResponseDTO<MaterialResponseDTO> result = materialService.searchMaterials(keyword, page, size);
+
+        return ApiResponse.success(SuccessStatus.MATERIAL_LIST_SUCCESS, result);
+    }
 }

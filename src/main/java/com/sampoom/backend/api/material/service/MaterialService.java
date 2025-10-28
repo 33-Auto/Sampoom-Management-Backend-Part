@@ -137,15 +137,7 @@ public class MaterialService {
     public PageResponseDTO<MaterialResponseDTO> searchMaterials(String keyword, int page, int size) {
 
         PageRequest pageRequest = PageRequest.of(page, size);
-        Page<Material> materials;
-
-        if (keyword == null || keyword.trim().isEmpty()) {
-            materials = materialRepository.findAll(pageRequest);
-        } else {
-            materials = materialRepository.findByNameContainingIgnoreCaseOrMaterialCodeContainingIgnoreCase(
-                    keyword, keyword, pageRequest
-            );
-        }
+        Page<Material> materials = materialRepository.search(keyword, pageRequest);
 
         List<MaterialResponseDTO> dtoList = materials.getContent().stream()
                 .map(MaterialResponseDTO::new)

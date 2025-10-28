@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "Item", description = "자재/부품 통합 검색 API")
+@Tag(name = "Item", description = "통합 검색 API (자재 + 부품)")
 @RestController
 @RequestMapping("/api/items")
 @RequiredArgsConstructor
@@ -20,16 +20,15 @@ public class ItemSearchController {
 
     private final ItemSearchService itemSearchService;
 
-    @Operation(summary = "통합 검색", description = "자재와 부품을 품목명 또는 코드 기준으로 통합 검색합니다.")
+    @Operation(summary = "통합 검색", description = "자재, 부품, 또는 전체 항목을 검색합니다.")
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<PageResponseDTO<ItemResponseDTO>>> searchItems(
-            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "") String keyword,
             @RequestParam(defaultValue = "ALL") ItemType type,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         PageResponseDTO<ItemResponseDTO> result = itemSearchService.searchItems(keyword, type, page, size);
-
-        return ApiResponse.success(SuccessStatus.OK, result);
+        return ApiResponse.success(SuccessStatus.ITEM_LIST_SUCCESS, result);
     }
 }

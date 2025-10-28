@@ -40,6 +40,7 @@ public class BomService {
         Part part = partRepository.findById(requestDTO.getPartId())
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.PART_NOT_FOUND));
 
+        // 기존 BOM 가져오거나 새로 생성
         Bom bom = bomRepository.findByPart_Id(part.getId())
                 .orElseGet(() -> Bom.builder()
                         .part(part)
@@ -50,33 +51,51 @@ public class BomService {
         Map<Long, BomMaterial> existingMaterials = bom.getMaterials().stream()
                 .collect(Collectors.toMap(m -> m.getMaterial().getId(), m -> m));
 
+        // 요청 자재 중복 제거 및 수량 합산
+        Map<Long, Long> idToQty = requestDTO.getMaterials().stream()
+                .collect(Collectors.toMap(
+                        BomRequestDTO.BomMaterialDTO::getMaterialId,
+                        BomRequestDTO.BomMaterialDTO::getQuantity,
+                        Long::sum // 중복 materialId 수량 합산
+                ));
+
+        // 한 번의 쿼리로 모든 자재 조회 (N+1 방지)
+        List<Material> materials = materialRepository.findAllById(idToQty.keySet());
+
+        if (materials.size() != idToQty.size()) {
+            throw new NotFoundException(ErrorStatus.MATERIAL_NOT_FOUND);
+        }
+
+        Map<Long, Material> matMap = materials.stream()
+                .collect(Collectors.toMap(Material::getId, m -> m));
+
+        // BOM 자재 리스트 구성
         List<BomMaterial> newMaterialList = new ArrayList<>();
 
-        for (BomRequestDTO.BomMaterialDTO dto : requestDTO.getMaterials()) {
-            Material material = materialRepository.findById(dto.getMaterialId())
-                    .orElseThrow(() -> new NotFoundException(ErrorStatus.MATERIAL_NOT_FOUND));
+        for (Map.Entry<Long, Long> entry : idToQty.entrySet()) {
+            Long materialId = entry.getKey();
+            Long quantity = entry.getValue();
+            Material material = matMap.get(materialId);
 
-            BomMaterial existing = existingMaterials.get(material.getId());
-
+            BomMaterial existing = existingMaterials.get(materialId);
             if (existing != null) {
-                // 이미 있는 자재 → 수량만 업데이트
-                existing.updateQuantity(dto.getQuantity());
+                existing.updateQuantity(quantity);
                 newMaterialList.add(existing);
             } else {
-                // 새로 추가된 자재
                 BomMaterial newMat = BomMaterial.builder()
                         .bom(bom)
                         .material(material)
-                        .quantity(dto.getQuantity())
+                        .quantity(quantity)
                         .build();
                 newMaterialList.add(newMat);
             }
         }
 
-        // 기존에 있었는데 요청에서 빠진 자재는 제거
+        // 요청에서 빠진 자재 제거
         bom.getMaterials().clear();
         bom.getMaterials().addAll(newMaterialList);
 
+        // 수정일 갱신 후 저장
         bom.touchNow();
 
         return BomResponseDTO.from(bomRepository.save(bom));
