@@ -1,4 +1,4 @@
-name: Part CI (use Gradle version)
+name: CI (use Gradle version)
 
 on:
   push:
@@ -34,8 +34,13 @@ jobs:
             perl -pi -e 's/\r\n/\n/g' Dockerfile
           fi
 
+      - name: Create application.properties from secret
+        run: |
+          mkdir -p src/main/resources
+          echo "${{ secrets.APP_PROPS_PART }}" > src/main/resources/application.yml
+
       - name: Build part jar
-        run: ./gradlew clean test bootJar -Dspring.profiles.active=ci
+        run: ./gradlew clean bootJar -x test -Dspring.profiles.active=ci
 
       # Gradle의 version 값을 읽어옴 (예: 1.0.0 또는 1.0.0-SNAPSHOT)
       - name: Read version from Gradle
@@ -51,8 +56,8 @@ jobs:
           echo "TAG_VERSION=part-${VER}" >> $GITHUB_OUTPUT
           echo "TAG_LATEST=part-latest" >> $GITHUB_OUTPUT
 
-
       - name: Login to Docker Hub
+        if: github.event_name == 'push'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -66,6 +71,7 @@ jobs:
             network=host
 
       - name: Build & Push (part)
+        if: github.event_name == 'push'
         uses: docker/build-push-action@v6
         env:
           BUILDKIT_PROGRESS: plain
@@ -78,25 +84,3 @@ jobs:
           tags: |
             ${{ steps.vars.outputs.IMAGE }}:${{ steps.vars.outputs.TAG_VERSION }}
             ${{ steps.vars.outputs.IMAGE }}:${{ steps.vars.outputs.TAG_LATEST }}
-            
-
-      # EC2 자동 배포
-      - name: Deploy to EC2 (Part)
-        uses: appleboy/ssh-action@master
-        with:
-          host: 3.38.218.173
-          username: ubuntu
-          key: ${{ secrets.SAMPOOM_KEY }}
-          script: |
-            echo "배포 시작..."
-            sudo docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
-            sudo docker pull hysungzzang/sampoom:part-latest
-            sudo docker stop part-service || true
-            sudo docker rm part-service || true
-            sudo docker run -d --name part-service -p 8080:8080 \
-              -e SPRING_APPLICATION_JSON='{"server":{"address":"0.0.0.0","port":8080}}' \
-              -e SPRING_DATASOURCE_URL=jdbc:postgresql://3.38.218.173:5432/mydb \
-              -e SPRING_DATASOURCE_USERNAME=myuser \
-              -e SPRING_DATASOURCE_PASSWORD=mypassword \
-              hysungzzang/sampoom:part-latest
-            echo "배포 완료!"

@@ -23,6 +23,8 @@ public enum ErrorStatus {
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "카테고리를 찾을 수 없습니다.", 30401),
     GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "그룹을 찾을 수 없습니다.", 30402),
     PART_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 부품을 찾을 수 없습니다.", 30403),
+    MATERIAL_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 자재를 찾을 수 없습니다.", 30404),
+    BOM_NOT_FOUND(HttpStatus.NOT_FOUND, "BOM을 찾을 수 없습니다.", 30405),
 
     // 409 CONFLICT
     CONFLICT(HttpStatus.CONFLICT, "충돌이 발생했습니다.",30900),
