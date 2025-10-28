@@ -1,7 +1,6 @@
 package com.sampoom.backend.api.workcenter.entity;
 
-import com.sampoom.backend.common.entitiy.BaseTimeEntity;
-import com.sampoom.backend.common.entitiy.SoftDeleteEntity;
+import com.sampoom.backend.common.entity.SoftDeleteEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,8 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
-
-import java.math.BigDecimal;
 
 @Entity
 @Getter
@@ -42,16 +39,16 @@ public class WorkCenter extends SoftDeleteEntity {
     @Column(nullable = false, length = 20)
     private WorkCenterStatus status;
 
-    // 일일 가동시간(시간), 소수 2자리
+
     @Column(nullable = false)
     private Integer dailyOperatingHours;
 
-    // 효율성(0~100), 소수 2자리
+
     @Column(nullable = false)
     private Integer efficiency;
 
-    // 시간당 비용, 양수
-    @Column(nullable = false, precision = 12, scale = 2)
+
+    @Column(nullable = false)
     private Integer costPerHour;
 
     public void changeName(String name) { this.name = name; }
