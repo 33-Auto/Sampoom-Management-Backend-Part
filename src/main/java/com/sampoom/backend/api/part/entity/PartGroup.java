@@ -1,5 +1,6 @@
 package com.sampoom.backend.api.part.entity;
 
+
 import com.sampoom.backend.api.part.dto.PartGroupUpdateRequestDTO;
 import com.sampoom.backend.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -36,7 +37,7 @@ public class PartGroup extends BaseTimeEntity {
         this.category = category;
     }
 
-    // ⭐️ [추가] 수정 메서드 (DTO 사용)
+    // 수정 메서드 (DTO 사용)
     public void update(PartGroupUpdateRequestDTO requestDTO) {
         // null이 아닐 경우에만 값을 변경 (부분 수정 지원)
         if (requestDTO.getCode() != null) {
