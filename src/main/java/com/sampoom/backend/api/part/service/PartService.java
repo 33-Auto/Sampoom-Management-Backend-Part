@@ -5,6 +5,8 @@ import com.sampoom.backend.api.part.entity.PartCategory;
 import com.sampoom.backend.api.part.entity.Part;
 import com.sampoom.backend.api.part.entity.PartGroup;
 import com.sampoom.backend.api.part.entity.PartStatus;
+import com.sampoom.backend.api.part.event.dto.PartEvent;
+import com.sampoom.backend.api.part.event.service.OutboxService;
 import com.sampoom.backend.api.part.repository.PartCategoryRepository;
 import com.sampoom.backend.api.part.repository.PartGroupRepository;
 import com.sampoom.backend.api.part.repository.PartRepository;
@@ -17,7 +19,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,6 +31,7 @@ public class PartService {
     private final PartRepository partRepository;
     private final PartGroupRepository partGroupRepository;
     private final PartCategoryRepository categoryRepository;
+    private final OutboxService outboxService;
 
     // 카테고리 목록 조회
     @Transactional
@@ -98,11 +103,30 @@ public class PartService {
         // 코드 자동 생성
         String nextCode = generateNextPartCode(partGroup.getId());
 
+        // 부품 생성
         Part newPart = new Part(nextCode, partCreateRequestDTO.getName(), partGroup);
+        Part savedPart = partRepository.save(newPart);
 
-        partRepository.save(newPart);
+        PartEvent.Payload payload = PartEvent.Payload.builder()
+                .partId(savedPart.getId())
+                .code(savedPart.getCode())
+                .name(savedPart.getName())
+                .status(savedPart.getStatus().name())
+                .deleted(false)
+                .groupId(partGroup.getId())
+                .categoryId(partGroup.getCategory().getId())
+                .build();
 
-        return new PartListResponseDTO(newPart);
+        // OutboxService 호출
+        outboxService.saveEvent(
+                "PART",
+                savedPart.getId(),
+                "PartCreated",
+                savedPart.getVersion(),
+                payload
+        );
+
+        return new PartListResponseDTO(savedPart);
     }
 
     // 부품 수정
@@ -114,7 +138,27 @@ public class PartService {
 
         part.update(partUpdateRequestDTO);
 
+        PartEvent.Payload payload = PartEvent.Payload.builder()
+                .partId(part.getId())
+                .code(part.getCode())
+                .name(part.getName())
+                .status(part.getStatus().name())
+                .deleted(false)
+                .groupId(part.getPartGroup().getId())
+                .categoryId(part.getPartGroup().getCategory().getId())
+                .build();
+
+        // OutboxService 호출
+        outboxService.saveEvent(
+                "PART",
+                part.getId(),
+                "PartUpdated",
+                part.getVersion(),
+                payload
+        );
+
         return new PartListResponseDTO(part);
+
     }
 
     // 부품 삭제
@@ -125,7 +169,27 @@ public class PartService {
         Part part = partRepository.findById(partId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.PART_NOT_FOUND));
 
-        partRepository.delete(part);
+        // Soft Delete 메서드 호출
+        part.delete();
+
+        PartEvent.Payload payload = PartEvent.Payload.builder()
+                .partId(part.getId())
+                .code(part.getCode())
+                .name(part.getName())
+                .status(part.getStatus().name()) // "DISCONTINUED"
+                .deleted(true)
+                .groupId(part.getPartGroup().getId())
+                .categoryId(part.getPartGroup().getCategory().getId())
+                .build();
+
+        // OutboxService 호출
+        outboxService.saveEvent(
+                "PART",
+                part.getId(),
+                "PartDeleted",
+                part.getVersion(),
+                payload
+        );
     }
 
     // 부품 검색
