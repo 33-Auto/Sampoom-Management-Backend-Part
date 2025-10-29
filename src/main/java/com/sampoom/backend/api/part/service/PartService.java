@@ -16,6 +16,7 @@ import com.sampoom.backend.common.response.ErrorStatus;
 import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -103,12 +104,37 @@ public class PartService {
         PartGroup partGroup = partGroupRepository.findById(partCreateRequestDTO.getGroupId())
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.GROUP_NOT_FOUND));
 
-        // 코드 자동 생성
+        // 코드 자동 생성 (처음 1회)
         String nextCode = generateNextPartCode(partGroup.getId());
 
-        // 부품 생성
-        Part newPart = new Part(nextCode, partCreateRequestDTO.getName(), partGroup);
-        Part savedPart = partRepository.save(newPart);
+        // 재시도 로직
+        int attempts = 0;
+        final int MAX_ATTEMPTS = 3;  // 최대 3번 재시도
+        Part savedPart;
+
+        while (true) {
+
+            try {
+                // 부품 생성 시도
+                Part newPart = new Part(nextCode, partCreateRequestDTO.getName(), partGroup);
+
+                savedPart = partRepository.saveAndFlush(newPart);
+                break;
+            } catch (DataIntegrityViolationException e) {
+                // ⭐️ 4. DataIntegrityViolationException 감지 (코드 중복 의심)
+                log.warn("DataIntegrityViolationException 감지 (코드 중복 가능성): {}", e.getMessage());
+
+                if (++attempts >= MAX_ATTEMPTS) {
+                    log.error("부품 코드 생성 3회 재시도 실패 (partGroup: {}).", partGroup.getId());
+                    // 3번 다 실패하면 그냥 예외를 던져서 500 에러 처리
+                    throw new RuntimeException("부품 코드 생성에 실패했습니다.", e);
+                }
+
+                // ⭐️ 5. (핵심) 중복이었으므로, 새 코드를 다시 받아옴
+                log.info("부품 코드 중복 감지, 새 코드 생성 재시도... (시도: {}/{} )", attempts, MAX_ATTEMPTS);
+                nextCode = generateNextPartCode(partGroup.getId());
+            }
+        }
 
         PartEvent.Payload payload = PartEvent.Payload.builder()
                 .partId(savedPart.getId())
@@ -184,6 +210,8 @@ public class PartService {
 
         // Soft Delete 메서드 호출
         part.delete();
+
+        partRepository.flush();
 
         PartEvent.Payload payload = PartEvent.Payload.builder()
                 .partId(part.getId())

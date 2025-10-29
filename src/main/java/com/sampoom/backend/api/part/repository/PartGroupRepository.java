@@ -19,4 +19,7 @@ public interface PartGroupRepository extends JpaRepository<PartGroup, Long> {
     // N+1 방지 (PartGroup -> PartCategory)
     @Query("SELECT g FROM PartGroup g JOIN FETCH g.category c")
     List<PartGroup> findAllForBootstrap();
+
+    // 특정 categoryId를 가진 그룹이 존재하는지 확인하는 메서드
+    boolean existsByCategoryId(Long categoryId);
 }

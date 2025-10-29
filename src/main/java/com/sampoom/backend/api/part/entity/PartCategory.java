@@ -31,7 +31,7 @@ public class PartCategory extends BaseTimeEntity {
         this.name = name;
     }
 
-    // ⭐️ [추가] 수정 메서드 (DTO 사용)
+    //  수정 메서드 (DTO 사용)
     public void update(PartCategoryUpdateRequestDTO requestDTO) {
         // null이 아닐 경우에만 값을 변경
         if (requestDTO.getCode() != null) {

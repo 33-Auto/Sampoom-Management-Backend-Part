@@ -6,6 +6,8 @@ import com.sampoom.backend.api.part.entity.PartCategory;
 import com.sampoom.backend.api.part.event.dto.PartCategoryEvent;
 import com.sampoom.backend.api.part.event.service.OutboxService;
 import com.sampoom.backend.api.part.repository.PartCategoryRepository;
+import com.sampoom.backend.api.part.repository.PartGroupRepository;
+import com.sampoom.backend.common.exception.BadRequestException;
 import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class PartCategoryService {
 
     private final PartCategoryRepository categoryRepository;
+    private final PartGroupRepository partGroupRepository;
     private final OutboxService outboxService;
 
     @Transactional
@@ -81,7 +84,14 @@ public class PartCategoryService {
         PartCategory category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.CATEGORY_NOT_FOUND));
 
-        categoryRepository.delete(category); // Hard Delete
+        // 이 카테고리를 사용하는 그룹이 있는지 확인
+        boolean isCategoryInUse = partGroupRepository.existsByCategoryId(categoryId);
+        if (isCategoryInUse) {
+            // 사용 중이면 에러 발생 (삭제 불가)
+            throw new BadRequestException(ErrorStatus.CATEGORY_IN_USE);
+        }
+
+        categoryRepository.delete(category);
 
         PartCategoryEvent.Payload payload = PartCategoryEvent.Payload.builder()
                 .categoryId(category.getId())
