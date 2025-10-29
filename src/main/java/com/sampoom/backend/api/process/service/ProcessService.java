@@ -2,6 +2,7 @@ package com.sampoom.backend.api.process.service;
 
 import com.sampoom.backend.api.part.entity.Part;
 import com.sampoom.backend.api.part.repository.PartRepository;
+import com.sampoom.backend.api.part.service.PartService;
 import com.sampoom.backend.api.process.dto.*;
 import com.sampoom.backend.api.process.entity.Process;
 import com.sampoom.backend.api.process.entity.ProcessStep;
@@ -29,6 +30,7 @@ public class ProcessService {
     private final ProcessRepository processRepository;
     private final PartRepository partRepository;
     private final WorkCenterRepository workCenterRepository;
+    private final PartService partService;
 
     /**
      * Process 코드 자동 생성 (PC-001 형태)
@@ -84,6 +86,10 @@ public class ProcessService {
                 });
 
         Process saved = processRepository.save(process);
+
+        // Part 리드타임 업데이트
+        partService.updateLeadTimeFromProcess(saved.getPart().getId());
+
         return new ProcessResponseDTO(saved);
     }
 
@@ -115,6 +121,9 @@ public class ProcessService {
     public ProcessResponseDTO update(Long id, ProcessUpdateRequestDTO req) {
         Process process = processRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.NOT_FOUND));
+
+        // 기존 Part ID를 백업 (Part 변경 여부와 관계없이 업데이트해야 함)
+        Long originalPartId = process.getPart().getId();
 
         // 부품 변경
         Part part = partRepository.findById(req.getPartId())
@@ -149,6 +158,14 @@ public class ProcessService {
         process.changeVersion(req.getVersion().trim());
         process.changeStatus(req.getStatus());
 
+        // 기존 Part의 리드타임은 0으로 초기화 (Part가 바뀌었을 경우를 대비)
+        if (!originalPartId.equals(part.getId())) {
+            partService.updateLeadTimeFromProcess(originalPartId); // (기존 Part는 0으로)
+        }
+
+        // 새 Part의 리드타임 업데이트
+        partService.updateLeadTimeFromProcess(part.getId());
+
         // 변경감지로 자동 반영
         return new ProcessResponseDTO(process);
     }
@@ -157,6 +174,10 @@ public class ProcessService {
     public void delete(Long id) {
         Process process = processRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.NOT_FOUND));
+        Long partId = process.getPart().getId();
+
         processRepository.delete(process);
+
+        partService.updateLeadTimeFromProcess(partId);
     }
 }

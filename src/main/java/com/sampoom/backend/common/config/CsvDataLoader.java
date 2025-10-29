@@ -72,7 +72,17 @@ public class CsvDataLoader implements CommandLineRunner {
                         )
                 );
 
-                Part part = new Part(currentLine[PART_CODE], currentLine[PART_NAME], partGroup);
+//                Part part = new Part(currentLine[PART_CODE], currentLine[PART_NAME], partGroup);
+
+                Part part = new Part(
+                        currentLine[PART_CODE],
+                        currentLine[PART_NAME],
+                        partGroup,
+                        "EA",
+                        100,
+                        0
+                );
+
                 partRepository.save(part);
             }
         }
