@@ -15,6 +15,12 @@ public interface WorkCenterRepository extends JpaRepository<WorkCenter, Long>, J
     boolean existsByNameIgnoreCaseAndIdNot(String name, Long id);
 
 
+
+    @Query(value = "SELECT code FROM work_center WHERE code LIKE 'WC-%' ORDER BY code DESC LIMIT 1 FOR UPDATE", nativeQuery = true)
+    String findLastWorkCenterCodeWithLock();
+
+    boolean existsByCode(String code);
+
     @Query(
             "SELECT w FROM WorkCenter w " +
                     "WHERE (w.deleted = false) " +

@@ -25,6 +25,27 @@ public class WorkCenterService {
 
     private final WorkCenterRepository workCenterRepository;
 
+    /**
+     * WorkCenter 코드 자동 생성 (WC-001 형태)
+     */
+    private String generateWorkCenterCode() {
+        String lastCode = workCenterRepository.findLastWorkCenterCodeWithLock();
+
+        if (lastCode == null) {
+            return "WC-001";
+        }
+
+        try {
+                        String numberPart = lastCode.substring(3);
+                        int nextNumber = Integer.parseInt(numberPart) + 1;
+                        return String.format("WC-%03d", nextNumber);
+                    } catch (Exception e) {
+                        throw new BadRequestException(ErrorStatus.BAD_REQUEST);
+                    }
+
+
+    }
+
     @Transactional
     public WorkCenterResponseDTO create(WorkCenterCreateRequestDTO req) {
         String name = req.getName().trim();
@@ -32,7 +53,11 @@ public class WorkCenterService {
             throw new BadRequestException(ErrorStatus.CONFLICT);
         }
 
+        // 코드 자동 생성
+        String generatedCode = generateWorkCenterCode();
+
         WorkCenter toSave = WorkCenter.builder()
+                .code(generatedCode)
                 .name(name)
                 .type(req.getType())
                 .status(req.getStatus())
@@ -49,7 +74,6 @@ public class WorkCenterService {
     public PageResponseDto<WorkCenterResponseDTO> search(String q, WorkCenterType type, WorkCenterStatus status, int page, int size) {
         int safePage = Math.max(page, 0);
         int safeSize = Math.min(Math.max(size, 1), 100);
-        // 정렬은 엔티티 필드명 사용(컬럼명 아님): id DESC
         Pageable pageable = PageRequest.of(safePage, safeSize, Sort.by(Sort.Direction.DESC, "id"));
 
         String keyword = (q == null || q.isBlank()) ? null : q.trim();
@@ -87,7 +111,6 @@ public class WorkCenterService {
         if (req.getEfficiency() != null) wc.changeEfficiency(req.getEfficiency());
         if (req.getCostPerHour() != null) wc.changeCostPerHour(req.getCostPerHour());
 
-        // 변경감지로 자동 반영
         return WorkCenterResponseDTO.from(wc);
     }
 

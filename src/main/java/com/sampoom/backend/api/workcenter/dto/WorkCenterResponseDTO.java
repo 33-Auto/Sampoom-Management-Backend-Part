@@ -8,7 +8,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -17,6 +16,7 @@ import java.time.LocalDateTime;
 @Builder
 public class WorkCenterResponseDTO {
     private Long id;
+    private String code;
     private String name;
     private WorkCenterType type;
     private WorkCenterStatus status;
@@ -29,6 +29,7 @@ public class WorkCenterResponseDTO {
     public static WorkCenterResponseDTO from(WorkCenter wc) {
         return WorkCenterResponseDTO.builder()
                 .id(wc.getId())
+                .code(wc.getCode())
                 .name(wc.getName())
                 .type(wc.getType())
                 .status(wc.getStatus())
