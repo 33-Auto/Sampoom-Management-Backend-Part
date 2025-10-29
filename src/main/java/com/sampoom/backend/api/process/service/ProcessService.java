@@ -128,7 +128,7 @@ public class ProcessService {
                 .sorted(Comparator.comparing(ProcessStepCreateRequestDTO::getStepOrder))
                 .forEach(s -> {
                     WorkCenter wc = workCenterRepository.findById(s.getWorkCenterId())
-                            .orElseThrow(() -> new NotFoundException(ErrorStatus.NOT_FOUND));
+                            .orElseThrow(() -> new NotFoundException(ErrorStatus.WORK_CENTER_NOT_FOUND));
 
                     ProcessStep step = ProcessStep.builder()
                             .process(process)

@@ -15,6 +15,7 @@ public class ProcessStepCreateRequestDTO {
     private Integer stepOrder;
 
     @NotBlank(message = "공정명을 입력하세요.")
+    @Size(max = 120, message = "공정명은 최대 120자입니다.")
     private String stepName;
 
     @NotNull(message = "작업장을 선택하세요.")

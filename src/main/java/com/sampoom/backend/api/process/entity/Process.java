@@ -51,6 +51,7 @@ public class Process extends BaseTimeEntity {
     private Integer totalStepMinutes = 0; // 모든 스텝의 총 시간 합계
 
     @OneToMany(mappedBy = "process", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("stepOrder ASC")
     @Builder.Default
     private List<ProcessStep> steps = new ArrayList<>();
 

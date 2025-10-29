@@ -18,6 +18,7 @@ public class ProcessCreateRequestDTO {
     private Long partId;
 
     @NotBlank(message = "버전을 입력하세요.")
+    @Size(max = 50, message = "버전은 최대 50자입니다.")
     private String version;
 
     @NotNull(message = "상태를 입력하세요.")

@@ -51,7 +51,7 @@ public class ProcessController {
         return ApiResponse.success(SuccessStatus.OK, response);
     }
 
-    @Operation(summary = "공정 수정", description = "공정의 버전, 상태를 수정합니다.")
+    @Operation(summary = "공정 수정",description = "부품(partId) 변경 및 공정 스텝(전량 교체), 버전, 상태를 수정합니다.")
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<ProcessResponseDTO>> update(
             @PathVariable Long id,

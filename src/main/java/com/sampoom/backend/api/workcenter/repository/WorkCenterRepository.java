@@ -14,9 +14,10 @@ public interface WorkCenterRepository extends JpaRepository<WorkCenter, Long>, J
     boolean existsByNameIgnoreCase(String name);
     boolean existsByNameIgnoreCaseAndIdNot(String name, Long id);
 
-    // 코드 자동 생성을 위한 메서드 추가
-    @Query("SELECT w.code FROM WorkCenter w WHERE w.code LIKE 'WC-%' ORDER BY w.code DESC LIMIT 1")
-    String findLastWorkCenterCode();
+
+
+    @Query(value = "SELECT code FROM work_center WHERE code LIKE 'WC-%' ORDER BY code DESC LIMIT 1 FOR UPDATE", nativeQuery = true)
+    String findLastWorkCenterCodeWithLock();
 
     boolean existsByCode(String code);
 

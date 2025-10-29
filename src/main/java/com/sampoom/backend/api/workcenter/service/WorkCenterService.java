@@ -29,17 +29,21 @@ public class WorkCenterService {
      * WorkCenter 코드 자동 생성 (WC-001 형태)
      */
     private String generateWorkCenterCode() {
-        String lastCode = workCenterRepository.findLastWorkCenterCode();
+        String lastCode = workCenterRepository.findLastWorkCenterCodeWithLock();
 
         if (lastCode == null) {
             return "WC-001";
         }
 
-        // WC-001에서 숫자 부분 추출
-        String numberPart = lastCode.substring(3);
-        int nextNumber = Integer.parseInt(numberPart) + 1;
+        try {
+                        String numberPart = lastCode.substring(3);
+                        int nextNumber = Integer.parseInt(numberPart) + 1;
+                        return String.format("WC-%03d", nextNumber);
+                    } catch (Exception e) {
+                        throw new BadRequestException(ErrorStatus.BAD_REQUEST);
+                    }
 
-        return String.format("WC-%03d", nextNumber);
+
     }
 
     @Transactional
