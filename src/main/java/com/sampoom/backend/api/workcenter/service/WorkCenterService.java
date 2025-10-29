@@ -70,7 +70,6 @@ public class WorkCenterService {
     public PageResponseDto<WorkCenterResponseDTO> search(String q, WorkCenterType type, WorkCenterStatus status, int page, int size) {
         int safePage = Math.max(page, 0);
         int safeSize = Math.min(Math.max(size, 1), 100);
-
         Pageable pageable = PageRequest.of(safePage, safeSize, Sort.by(Sort.Direction.DESC, "id"));
 
         String keyword = (q == null || q.isBlank()) ? null : q.trim();
@@ -82,7 +81,6 @@ public class WorkCenterService {
                 .totalPages(result.getTotalPages())
                 .build();
     }
-
     @Transactional(readOnly = true)
     public WorkCenterResponseDTO get(Long id) {
         WorkCenter wc = workCenterRepository.findById(id)
