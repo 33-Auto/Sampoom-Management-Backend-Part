@@ -13,6 +13,8 @@ public class MaterialResponseDTO {
     private String name;
     private String materialCode;
     private String materialUnit;
+    private Integer baseQuantity;  // 기준단위
+    private Integer leadTime;      // 리드타임
 
     private Long materialCategoryId;
     private String materialCategoryName;
@@ -22,6 +24,8 @@ public class MaterialResponseDTO {
         this.name = material.getName();
         this.materialCode = material.getMaterialCode();
         this.materialUnit = material.getMaterialUnit();
+        this.baseQuantity = material.getBaseQuantity();
+        this.leadTime = material.getLeadTime();
 
         if (material.getMaterialCategory() != null) {
             this.materialCategoryId = material.getMaterialCategory().getId();
