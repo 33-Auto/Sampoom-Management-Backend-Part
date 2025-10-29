@@ -13,7 +13,9 @@ import com.sampoom.backend.api.part.repository.PartRepository;
 import com.sampoom.backend.common.dto.PageResponseDTO;
 import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
+import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PartService {
@@ -132,33 +135,43 @@ public class PartService {
     // 부품 수정
     @Transactional
     public PartListResponseDTO updatePart(Long partId, PartUpdateRequestDTO partUpdateRequestDTO) {
-        // 수정할 부품을 조회
-        Part part = partRepository.findById(partId)
-                .orElseThrow(() -> new NotFoundException(ErrorStatus.PART_NOT_FOUND));
 
-        part.update(partUpdateRequestDTO);
+        try {
+            // 수정할 부품을 조회
+            Part part = partRepository.findById(partId)
+                    .orElseThrow(() -> new NotFoundException(ErrorStatus.PART_NOT_FOUND));
 
-        PartEvent.Payload payload = PartEvent.Payload.builder()
-                .partId(part.getId())
-                .code(part.getCode())
-                .name(part.getName())
-                .status(part.getStatus().name())
-                .deleted(false)
-                .groupId(part.getPartGroup().getId())
-                .categoryId(part.getPartGroup().getCategory().getId())
-                .build();
+            part.update(partUpdateRequestDTO);
 
-        // OutboxService 호출
-        outboxService.saveEvent(
-                "PART",
-                part.getId(),
-                "PartUpdated",
-                part.getVersion(),
-                payload
-        );
+            // ⭐️ 3. flush()가 try 블록 안에 있어야 예외를 잡을 수 있습니다.
+            partRepository.flush();
 
-        return new PartListResponseDTO(part);
+            PartEvent.Payload payload = PartEvent.Payload.builder()
+                    .partId(part.getId())
+                    .code(part.getCode())
+                    .name(part.getName())
+                    .status(part.getStatus().name())
+                    .deleted(false)
+                    .groupId(part.getPartGroup().getId())
+                    .categoryId(part.getPartGroup().getCategory().getId())
+                    .build();
 
+            // OutboxService 호출
+            outboxService.saveEvent(
+                    "PART",
+                    part.getId(),
+                    "PartUpdated",
+                    part.getVersion(),
+                    payload
+            );
+
+            return new PartListResponseDTO(part);
+
+        } catch (OptimisticLockException e) {
+            // ⭐️ 4. 예외가 발생하면 GlobalExceptionHandler가 처리하도록 그냥 re-throw 합니다.
+            log.warn("Part 동시 수정 충돌 감지 (partId: {}): {}", partId, e.getMessage());
+            throw e;
+        }
     }
 
     // 부품 삭제

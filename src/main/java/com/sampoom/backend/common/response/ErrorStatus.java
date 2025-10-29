@@ -30,6 +30,8 @@ public enum ErrorStatus {
     CONFLICT(HttpStatus.CONFLICT, "충돌이 발생했습니다.",30900),
     PART_CODE_DUPLICATED(HttpStatus.CONFLICT, "이미 존재하는 부품 코드입니다.", 30901),
 
+    DATA_CONFLICT(HttpStatus.CONFLICT, "다른 사용자에 의해 데이터가 수정되었습니다.", 30902),
+
     // 500 INTERNAL_SERVER_ERROR
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다.", 10500);
 

@@ -1,4 +1,4 @@
-package com.sampoom.backend.common.entitiy;
+package com.sampoom.backend.common.entity;
 
 public enum OutboxStatus {
     READY,

@@ -52,8 +52,9 @@ public class PartCategoryService {
         PartCategory category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.CATEGORY_NOT_FOUND));
 
-        // PartCategory 엔티티에 update(code, name) 메서드가 있다고 가정
         category.update(updateRequestDTO);
+
+        categoryRepository.flush();
 
         // Payload 생성
         PartCategoryEvent.Payload payload = PartCategoryEvent.Payload.builder()

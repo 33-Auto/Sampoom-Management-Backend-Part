@@ -1,7 +1,7 @@
 package com.sampoom.backend.api.part.event.entity;
 
-import com.sampoom.backend.common.entitiy.BaseTimeEntity;
-import com.sampoom.backend.common.entitiy.OutboxStatus;
+import com.sampoom.backend.common.entity.BaseTimeEntity;
+import com.sampoom.backend.common.entity.OutboxStatus;
 import jakarta.persistence.*;
 import lombok.*;
 

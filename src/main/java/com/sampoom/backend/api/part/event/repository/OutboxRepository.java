@@ -1,7 +1,7 @@
 package com.sampoom.backend.api.part.event.repository;
 
 import com.sampoom.backend.api.part.event.entity.Outbox;
-import com.sampoom.backend.common.entitiy.OutboxStatus;
+import com.sampoom.backend.common.entity.OutboxStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

@@ -58,8 +58,9 @@ public class PartGroupService {
         PartGroup partGroup = partGroupRepository.findById(groupId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.GROUP_NOT_FOUND));
 
-        // PartGroup 엔티티에 update(code, name) 메서드가 있다고 가정
         partGroup.update(updateRequestDTO);
+
+        partGroupRepository.flush();
 
         PartGroupEvent.Payload payload = PartGroupEvent.Payload.builder()
                 .groupId(partGroup.getId())
