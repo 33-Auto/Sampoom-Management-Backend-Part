@@ -24,6 +24,10 @@ public class ProcessUpdateRequestDTO {
     @NotNull(message = "상태를 입력하세요.")
     private ProcessStatus status;
 
+    @NotNull(message = "생산량을 입력하세요.")
+    @Min(value = 1, message = "생산량은 최소 1 이상이어야 합니다.")
+    private Integer quantity;
+
     @NotEmpty(message = "공정 순서를 1개 이상 입력하세요.")
     @Valid
     private List<ProcessStepCreateRequestDTO> steps;

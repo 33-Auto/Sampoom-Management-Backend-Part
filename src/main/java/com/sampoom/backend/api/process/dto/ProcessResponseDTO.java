@@ -16,6 +16,7 @@ public class ProcessResponseDTO {
     private final String partCode;
     private final String version;
     private final ProcessStatus status;
+    private final Integer quantity; // 생산량 추가
     private final Integer stepCount; // 스텝 수 추가
     private final Integer totalSetupMinutes; // 모든 스텝의 준비시간 합계
     private final Integer totalProcessMinutes; // 모든 스텝의 가공시간 합계
@@ -31,6 +32,7 @@ public class ProcessResponseDTO {
         this.partCode = p.getPart().getCode();
         this.version = p.getVersion();
         this.status = p.getStatus();
+        this.quantity = p.getQuantity(); // 생산량 추가
         this.stepCount = p.getStepCount(); // 스텝 수 추가
         this.totalSetupMinutes = p.getTotalSetupMinutes();
         this.totalProcessMinutes = p.getTotalProcessMinutes();

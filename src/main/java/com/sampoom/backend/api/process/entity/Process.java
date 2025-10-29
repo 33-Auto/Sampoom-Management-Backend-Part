@@ -37,6 +37,9 @@ public class Process extends BaseTimeEntity {
     @Column(nullable = false)
     private Integer stepCount = 0; // 스텝 수
 
+    @Column(nullable = false)
+    private Integer quantity = 1; // 생산량
+
     // 모든 스텝의 총 시간 합계 컬럼들 추가
     @Column(nullable = false)
     private Integer totalSetupMinutes = 0; // 모든 스텝의 준비시간 합계
@@ -93,4 +96,5 @@ public class Process extends BaseTimeEntity {
     public void changeVersion(String version) { this.version = version; }
     public void changeStatus(ProcessStatus status) { this.status = status; }
     public void changePart(Part part) { this.part = part; }
+    public void changeQuantity(Integer quantity) { this.quantity = quantity; }
 }

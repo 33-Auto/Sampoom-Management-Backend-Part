@@ -60,6 +60,7 @@ public class ProcessService {
                 .part(part)
                 .version(req.getVersion().trim())
                 .status(req.getStatus())
+                .quantity(req.getQuantity())
                 .build();
 
         // step 순서 기준 정렬 후 추가
@@ -148,6 +149,7 @@ public class ProcessService {
         process.changePart(part);
         process.changeVersion(req.getVersion().trim());
         process.changeStatus(req.getStatus());
+        process.changeQuantity(req.getQuantity());
 
         // 변경감지로 자동 반영
         return new ProcessResponseDTO(process);
