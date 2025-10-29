@@ -11,6 +11,7 @@ public enum ErrorStatus {
 
     // 400 BAD_REQUEST
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다.", 30000),
+    CATEGORY_IN_USE(HttpStatus.BAD_REQUEST, "해당 카테고리를 사용하는 그룹이 존재하여 삭제할 수 없습니다.", 30001),
 
     // 401 UNAUTHORIZED
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다.", 10401),
@@ -29,6 +30,8 @@ public enum ErrorStatus {
     // 409 CONFLICT
     CONFLICT(HttpStatus.CONFLICT, "충돌이 발생했습니다.",30900),
     PART_CODE_DUPLICATED(HttpStatus.CONFLICT, "이미 존재하는 부품 코드입니다.", 30901),
+
+    DATA_CONFLICT(HttpStatus.CONFLICT, "다른 사용자에 의해 데이터가 수정되었습니다.", 30902),
 
     // 500 INTERNAL_SERVER_ERROR
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다.", 10500);

@@ -1,6 +1,5 @@
 package com.sampoom.backend.api.part.entity;
 
-import com.sampoom.backend.api.part.dto.PartCreateRequestDTO;
 import com.sampoom.backend.api.part.dto.PartUpdateRequestDTO;
 import com.sampoom.backend.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -29,6 +28,10 @@ public class Part extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id", nullable = false)
     private PartGroup partGroup; // PartGroup 엔티티와 N:1 관계
+
+    @Version
+    @Column(nullable = false)
+    private Long version; // 버전 필드 추가
 
     // CSV 로더가 사용할 생성자
     public Part(String code, String name, PartGroup partGroup) {

@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 
 public interface PartRepository extends JpaRepository<Part, Long> {
 
@@ -37,4 +39,8 @@ where p.status = :status
     Part findTopByPartGroupIdOrderByIdDesc(Long groupId);
 
     Part findTopByPartGroupIdOrderByCodeDesc(Long groupId);
+
+    // N+1 방지 (Part -> PartGroup -> PartCategory)
+    @Query("SELECT p FROM Part p JOIN FETCH p.partGroup g JOIN FETCH g.category c")
+    List<Part> findAllForBootstrap();
 }
