@@ -2,7 +2,7 @@ package com.sampoom.backend.api.part.entity;
 
 import com.sampoom.backend.api.part.dto.PartCreateRequestDTO;
 import com.sampoom.backend.api.part.dto.PartUpdateRequestDTO;
-import com.sampoom.backend.common.entitiy.BaseTimeEntity;
+import com.sampoom.backend.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
