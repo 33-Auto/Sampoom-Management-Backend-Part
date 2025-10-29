@@ -22,6 +22,11 @@ public class PartEvent {
         private Long partId;
         private String code;
         private String name;
+
+        private String partUnit;
+        private Integer baseQuantity;
+        private Integer leadTime;
+
         private String status;
         private Boolean deleted;
 
