@@ -147,6 +147,9 @@ public class PartService {
                 .partId(savedPart.getId())
                 .code(savedPart.getCode())
                 .name(savedPart.getName())
+                .partUnit(savedPart.getPartUnit())
+                .baseQuantity(savedPart.getBaseQuantity())
+                .leadTime(savedPart.getLeadTime())
                 .status(savedPart.getStatus().name())
                 .deleted(false)
                 .groupId(partGroup.getId())
@@ -182,6 +185,9 @@ public class PartService {
                     .partId(part.getId())
                     .code(part.getCode())
                     .name(part.getName())
+                    .partUnit(part.getPartUnit())
+                    .baseQuantity(part.getBaseQuantity())
+                    .leadTime(part.getLeadTime())
                     .status(part.getStatus().name())
                     .deleted(false)
                     .groupId(part.getPartGroup().getId())
@@ -222,6 +228,9 @@ public class PartService {
                 .partId(part.getId())
                 .code(part.getCode())
                 .name(part.getName())
+                .partUnit(part.getPartUnit())
+                .baseQuantity(part.getBaseQuantity())
+                .leadTime(part.getLeadTime())
                 .status(part.getStatus().name()) // "DISCONTINUED"
                 .deleted(true)
                 .groupId(part.getPartGroup().getId())
@@ -306,7 +315,35 @@ public class PartService {
 
             // DB에 변경사항 반영 (@Version 증가)
             partRepository.flush();
+
+            // Kafka 이벤트 발행
+            publishPartUpdatedEvent(part);
         }
     }
+
+    // 이벤트 발행 헬퍼 메서드
+    private void publishPartUpdatedEvent(Part part) {
+        PartEvent.Payload payload = PartEvent.Payload.builder()
+                .partId(part.getId())
+                .code(part.getCode())
+                .name(part.getName())
+                .partUnit(part.getPartUnit())
+                .baseQuantity(part.getBaseQuantity())
+                .leadTime(part.getLeadTime())
+                .status(part.getStatus().name())
+                .deleted(part.getStatus() == PartStatus.DISCONTINUED)
+                .groupId(part.getPartGroup().getId())
+                .categoryId(part.getPartGroup().getCategory().getId())
+                .build();
+
+        outboxService.saveEvent(
+                "PART",
+                part.getId(),
+                "PartUpdated",
+                part.getVersion(),
+                payload
+        );
+    }
+
 
 }
