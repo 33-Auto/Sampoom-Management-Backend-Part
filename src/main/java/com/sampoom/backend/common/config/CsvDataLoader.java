@@ -1,7 +1,12 @@
 package com.sampoom.backend.common.config;
 
-import com.sampoom.backend.api.domain.*;
 import com.opencsv.CSVReader;
+import com.sampoom.backend.api.part.entity.PartCategory;
+import com.sampoom.backend.api.part.entity.Part;
+import com.sampoom.backend.api.part.entity.PartGroup;
+import com.sampoom.backend.api.part.repository.PartCategoryRepository;
+import com.sampoom.backend.api.part.repository.PartGroupRepository;
+import com.sampoom.backend.api.part.repository.PartRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
@@ -18,7 +23,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CsvDataLoader implements CommandLineRunner {
 
-    private final CategoryRepository categoryRepository;
+    private final PartCategoryRepository categoryRepository;
     private final PartGroupRepository partGroupRepository;
     private final PartRepository partRepository;
 
@@ -44,16 +49,16 @@ public class CsvDataLoader implements CommandLineRunner {
             reader.readNext();  // 헤더 행 건너뛰기
 
             String[] line;
-            Map<String, Category> categoryCache = new HashMap<>();
+            Map<String, PartCategory> categoryCache = new HashMap<>();
             Map<String, PartGroup> groupCache = new HashMap<>();
 
             while ((line = reader.readNext()) != null) {
                 final String[] currentLine = line;
 
                 String categoryCode = currentLine[CATEGORY_CODE];
-                Category category = categoryCache.computeIfAbsent(categoryCode, code ->
+                PartCategory category = categoryCache.computeIfAbsent(categoryCode, code ->
                         categoryRepository.findByCode(code).orElseGet(() ->
-                                categoryRepository.save(new Category(code, currentLine[CATEGORY_NAME]))
+                                categoryRepository.save(new PartCategory(code, currentLine[CATEGORY_NAME]))
                         )
                 );
 

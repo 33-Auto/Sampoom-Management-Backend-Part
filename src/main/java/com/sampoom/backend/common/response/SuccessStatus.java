@@ -32,6 +32,9 @@ public enum SuccessStatus {
     WORKCENTER_UPDATE_SUCCESS(HttpStatus.OK, "작업장 수정 성공"),
     WORKCENTER_DELETE_SUCCESS(HttpStatus.OK, "작업장 삭제 성공"),
 
+    MATERIAL_LIST_SUCCESS(HttpStatus.OK, "자재 목록 조회 성공"),
+    ITEM_LIST_SUCCESS(HttpStatus.OK, "자재/부품 전체 조회 성공"),
+
     ;
 
 
