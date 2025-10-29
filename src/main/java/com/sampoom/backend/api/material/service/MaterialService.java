@@ -92,6 +92,8 @@ public class MaterialService {
                 .name(requestDTO.getName())
                 .materialCode(materialCode)
                 .materialUnit(requestDTO.getMaterialUnit())
+                .baseQuantity(requestDTO.getBaseQuantity())
+                .leadTime(requestDTO.getLeadTime())
                 .materialCategory(category)
                 .build();
 
@@ -119,7 +121,8 @@ public class MaterialService {
         }
 
         // 나머지 필드 수정
-        material.updateBasicInfo(requestDTO.getName(), requestDTO.getMaterialUnit());
+        material.updateBasicInfo(requestDTO.getName(), requestDTO.getMaterialUnit(),
+                                requestDTO.getBaseQuantity(), requestDTO.getLeadTime());
 
         return new MaterialResponseDTO(material);
     }

@@ -13,4 +13,6 @@ public class MaterialRequestDTO {
     private String name;
     private Long materialCategoryId;
     private String materialUnit;
+    private Integer baseQuantity;  // 기준단위
+    private Integer leadTime;      // 리드타임
 }
