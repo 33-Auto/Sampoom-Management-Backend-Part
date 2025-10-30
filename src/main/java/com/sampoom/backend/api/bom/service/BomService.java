@@ -4,11 +4,15 @@ import com.sampoom.backend.api.bom.dto.BomDetailResponseDTO;
 import com.sampoom.backend.api.bom.dto.BomRequestDTO;
 import com.sampoom.backend.api.bom.dto.BomResponseDTO;
 import com.sampoom.backend.api.bom.entity.Bom;
+import com.sampoom.backend.api.bom.entity.BomComplexity;
 import com.sampoom.backend.api.bom.entity.BomMaterial;
+import com.sampoom.backend.api.bom.entity.BomStatus;
+import com.sampoom.backend.api.bom.event.dto.BomEvent;
 import com.sampoom.backend.api.bom.repository.BomRepository;
 import com.sampoom.backend.api.material.entity.Material;
 import com.sampoom.backend.api.material.repository.MaterialRepository;
 import com.sampoom.backend.api.part.entity.Part;
+import com.sampoom.backend.api.part.event.service.OutboxService;
 import com.sampoom.backend.api.part.repository.PartRepository;
 import com.sampoom.backend.common.dto.PageResponseDTO;
 import com.sampoom.backend.common.exception.NotFoundException;
@@ -21,9 +25,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.time.OffsetDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,6 +35,7 @@ public class BomService {
     private final BomRepository bomRepository;
     private final PartRepository partRepository;
     private final MaterialRepository materialRepository;
+    private final OutboxService outboxService;
 
 
     // BOM 생성
@@ -45,6 +49,8 @@ public class BomService {
                 .orElseGet(() -> Bom.builder()
                         .part(part)
                         .materials(new ArrayList<>())
+                        .status(BomStatus.PENDING_APPROVAL)
+                        .complexity(BomComplexity.SIMPLE)
                         .build());
 
         // 기존 자재를 Map으로 변환 (id 기준)
@@ -95,10 +101,17 @@ public class BomService {
         bom.getMaterials().clear();
         bom.getMaterials().addAll(newMaterialList);
 
+        // 복잡도 자동 계산
+        bom.calculateComplexity();
+
         // 수정일 갱신 후 저장
         bom.touchNow();
 
-        return BomResponseDTO.from(bomRepository.save(bom));
+        Bom saved =  bomRepository.save(bom);
+
+        publishBomEvent(saved, "BomCreated");
+
+        return BomResponseDTO.from(saved);
     }
 
 
@@ -154,9 +167,17 @@ public class BomService {
             bom.addMaterial(bomMaterial);
         }
 
+
+        // 복잡도 재계산
+        bom.calculateComplexity();
+
         bom.touchNow();
 
-        return BomResponseDTO.from(bom);
+        Bom saved = bomRepository.save(bom);
+
+        publishBomEvent(saved, "BomUpdated");
+
+        return BomResponseDTO.from(saved);
     }
 
     // BOM 삭제
@@ -166,12 +187,101 @@ public class BomService {
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.BOM_NOT_FOUND));
 
         bomRepository.delete(bom);
+
+        publishBomDeletedEvent(bom);
     }
 
+
+    /** ----------------------------
+     * Outbox 이벤트 발행 메서드
+     * ---------------------------- */
+    private void publishBomEvent(Bom bom, String eventType) {
+        BomEvent.Payload payload = BomEvent.Payload.builder()
+                .bomId(bom.getId())
+                .partId(bom.getPart().getId())
+                .partCode(bom.getPart().getCode())
+                .partName(bom.getPart().getName())
+                .status(bom.getStatus().name())
+                .complexity(bom.getComplexity().name())
+                .deleted(false)
+                .materials(bom.getMaterials().stream()
+                        .map(m -> BomEvent.Payload.MaterialInfo.builder()
+                                .materialId(m.getMaterial().getId())
+                                .materialName(m.getMaterial().getName())
+                                .materialCode(m.getMaterial().getMaterialCode())
+                                .unit(m.getMaterial().getMaterialUnit())
+                                .quantity(m.getQuantity())
+                                .build())
+                        .toList())
+                .build();
+
+        BomEvent event = BomEvent.builder()
+                .eventId(UUID.randomUUID().toString())
+                .eventType(eventType)
+                .version(bom.getVersion())
+                .occurredAt(OffsetDateTime.now().toString())
+                .payload(payload)
+                .build();
+
+        outboxService.saveEvent(
+                "BOM",
+                bom.getId(),
+                eventType,
+                bom.getVersion(),
+                event.getPayload()
+        );
+    }
+
+    private void publishBomDeletedEvent(Bom bom) {
+        BomEvent.Payload payload = BomEvent.Payload.builder()
+                .bomId(bom.getId())
+                .partId(bom.getPart().getId())
+                .partCode(bom.getPart().getCode())
+                .partName(bom.getPart().getName())
+                .status("DELETED")
+                .complexity(bom.getComplexity().name())
+                .deleted(true)
+                .materials(Collections.emptyList())
+                .build();
+
+        BomEvent event = BomEvent.builder()
+                .eventId(UUID.randomUUID().toString())
+                .eventType("BomDeleted")
+                .version(bom.getVersion())
+                .occurredAt(OffsetDateTime.now().toString())
+                .payload(payload)
+                .build();
+
+        outboxService.saveEvent(
+                "BOM",
+                bom.getId(),
+                "BomDeleted",
+                bom.getVersion(),
+                event.getPayload()
+        );
+    }
+
+
+
     // BOM 검색
-    public PageResponseDTO<BomResponseDTO> searchBoms(String keyword, Long categoryId, Long groupId, int page, int size) {
+    public PageResponseDTO<BomResponseDTO> searchBoms(
+            String keyword,
+            Long categoryId,
+            Long groupId,
+            BomStatus status,
+            BomComplexity complexity,
+            int page,
+            int size
+    ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Bom> bomPage = bomRepository.findByFilters(keyword, categoryId, groupId, pageable);
+        Page<Bom> bomPage = bomRepository.findByFilters(
+                keyword,
+                categoryId,
+                groupId,
+                status,
+                complexity,
+                pageable
+        );
 
         return PageResponseDTO.<BomResponseDTO>builder()
                 .content(bomPage.getContent().stream()
@@ -182,5 +292,16 @@ public class BomService {
                 .currentPage(bomPage.getNumber())
                 .pageSize(bomPage.getSize())
                 .build();
+    }
+
+    /**
+     * BOM 상태 변경 (활성/비활성 등)
+     */
+    @Transactional
+    public void updateBomStatus(Long bomId, BomStatus newStatus) {
+        Bom bom = bomRepository.findById(bomId)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.BOM_NOT_FOUND));
+        bom.updateStatus(newStatus);
+        bomRepository.save(bom);
     }
 }

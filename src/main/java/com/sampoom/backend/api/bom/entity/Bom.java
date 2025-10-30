@@ -30,13 +30,46 @@ public class Bom extends BaseTimeEntity {
     @Builder.Default
     private List<BomMaterial> materials = new ArrayList<>();
 
+    /** BOM 상태 (활성/검토중/비활성/승인대기) */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private BomStatus status = BomStatus.PENDING_APPROVAL;
+
+    /** BOM 복잡도 (단순/보통/복잡) */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private BomComplexity complexity = BomComplexity.SIMPLE;
+
+    @Version
+    private Long version;
+
     public void addMaterial(BomMaterial bomMaterial) {
         this.materials.add(bomMaterial);
 
         if (bomMaterial.getBom() != this) {
             bomMaterial.updateBom(this);
         }
+
+        // 복잡도 재계산
+        calculateComplexity();
     }
 
+    // 수정일 갱신
     public void touchNow() { this.updatedAt = LocalDateTime.now(); }
+
+    /** 복잡도 자동 계산 로직 */
+    public void calculateComplexity() {
+        int count = this.materials.size();
+        if (count <= 2) this.complexity = BomComplexity.SIMPLE;
+        else if (count <= 4) this.complexity = BomComplexity.NORMAL;
+        else this.complexity = BomComplexity.COMPLEX;
+    }
+
+    /** 상태 변경 */
+    public void updateStatus(BomStatus newStatus) {
+        this.status = newStatus;
+        touchNow();
+    }
 }
