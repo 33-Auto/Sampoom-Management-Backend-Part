@@ -685,3 +685,7 @@ gradle-app.setting
 
 src/main/resources/application*.yml
 src/main/resources/application*.properties
+
+# IntelliJ project settings
+.idea/
+*.iml
