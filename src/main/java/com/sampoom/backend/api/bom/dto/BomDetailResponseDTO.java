@@ -19,6 +19,8 @@ public class BomDetailResponseDTO {
     private String partName;
     private String partCode;
     private Long partId;
+    private String status;
+    private String complexity;
     private List<BomMaterialDTO> materials;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -53,6 +55,8 @@ public class BomDetailResponseDTO {
                 .partId(bom.getPart().getId())
                 .partName(bom.getPart().getName())
                 .partCode(bom.getPart().getCode())
+                .status(bom.getStatus().name())
+                .complexity(bom.getComplexity().name())
                 .materials(materialDtos)
                 .createdAt(bom.getCreatedAt())
                 .updatedAt(bom.getUpdatedAt())

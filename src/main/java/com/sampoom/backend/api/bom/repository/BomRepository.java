@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface BomRepository extends JpaRepository<Bom,Long> {
+public interface BomRepository extends JpaRepository<Bom, Long> {
 
     @Query("""
 SELECT b FROM Bom b
