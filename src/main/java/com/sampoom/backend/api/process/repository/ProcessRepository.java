@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
+
 public interface ProcessRepository extends JpaRepository<Process, Long> {
     // 코드 자동 생성을 위한 메서드 추가
     @Query(value = "SELECT code FROM process_master WHERE code LIKE 'PC-%' ORDER BY code DESC LIMIT 1", nativeQuery = true)
@@ -39,4 +41,7 @@ public interface ProcessRepository extends JpaRepository<Process, Long> {
             @Param("status") ProcessStatus status,
             Pageable pageable
     );
+
+    // Part ID를 기준으로 Process 엔티티를 조회하는 메서드
+    Optional<Process> findByPartId(Long partId);
 }

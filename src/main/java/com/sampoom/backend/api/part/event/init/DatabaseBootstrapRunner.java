@@ -112,15 +112,20 @@
 //        int inserted = 0;
 //
 //        for (Part part : allParts) {
-//            boolean alreadyExists = outboxRepository.existsByAggregateIdAndAggregateType(
-//                    part.getId(), "PART");
+////            boolean alreadyExists = outboxRepository.existsByAggregateIdAndAggregateType(
+////                    part.getId(), "PART");
 //
-//            if (alreadyExists) continue;
+////            if (alreadyExists) continue;
 //
 //            PartEvent.Payload payload = PartEvent.Payload.builder()
 //                    .partId(part.getId())
 //                    .code(part.getCode())
 //                    .name(part.getName())
+//
+//                    .partUnit(part.getPartUnit())
+//                    .baseQuantity(part.getBaseQuantity())
+//                    .leadTime(part.getLeadTime())
+//
 //                    .status(part.getStatus().name())
 //                    .deleted(false)
 //                    .groupId(part.getPartGroup().getId()) // N+1 방지됨

@@ -12,4 +12,7 @@ public class PartUpdateRequestDTO {
 
     private String name;
     private PartStatus status;
+    private String partUnit;
+    private Integer baseQuantity;
+    private Integer leadTime;
 }

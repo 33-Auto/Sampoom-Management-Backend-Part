@@ -10,6 +10,8 @@ import com.sampoom.backend.api.part.event.service.OutboxService;
 import com.sampoom.backend.api.part.repository.PartCategoryRepository;
 import com.sampoom.backend.api.part.repository.PartGroupRepository;
 import com.sampoom.backend.api.part.repository.PartRepository;
+import com.sampoom.backend.api.process.entity.Process;
+import com.sampoom.backend.api.process.repository.ProcessRepository;
 import com.sampoom.backend.common.dto.PageResponseDTO;
 import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
@@ -22,9 +24,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -36,6 +36,7 @@ public class PartService {
     private final PartGroupRepository partGroupRepository;
     private final PartCategoryRepository categoryRepository;
     private final OutboxService outboxService;
+    private final ProcessRepository processRepository;
 
     // 카테고리 목록 조회
     @Transactional
@@ -116,12 +117,18 @@ public class PartService {
 
             try {
                 // 부품 생성 시도
-                Part newPart = new Part(nextCode, partCreateRequestDTO.getName(), partGroup);
+                Part newPart = new Part(nextCode,
+                        partCreateRequestDTO.getName(),
+                        partGroup,
+                        partCreateRequestDTO.getPartUnit(),
+                        partCreateRequestDTO.getBaseQuantity(),
+                        partCreateRequestDTO.getLeadTime()
+                );
 
                 savedPart = partRepository.saveAndFlush(newPart);
                 break;
             } catch (DataIntegrityViolationException e) {
-                // ⭐️ 4. DataIntegrityViolationException 감지 (코드 중복 의심)
+                // DataIntegrityViolationException 감지 (코드 중복 의심)
                 log.warn("DataIntegrityViolationException 감지 (코드 중복 가능성): {}", e.getMessage());
 
                 if (++attempts >= MAX_ATTEMPTS) {
@@ -140,6 +147,9 @@ public class PartService {
                 .partId(savedPart.getId())
                 .code(savedPart.getCode())
                 .name(savedPart.getName())
+                .partUnit(savedPart.getPartUnit())
+                .baseQuantity(savedPart.getBaseQuantity())
+                .leadTime(savedPart.getLeadTime())
                 .status(savedPart.getStatus().name())
                 .deleted(false)
                 .groupId(partGroup.getId())
@@ -169,13 +179,15 @@ public class PartService {
 
             part.update(partUpdateRequestDTO);
 
-            // ⭐️ 3. flush()가 try 블록 안에 있어야 예외를 잡을 수 있습니다.
             partRepository.flush();
 
             PartEvent.Payload payload = PartEvent.Payload.builder()
                     .partId(part.getId())
                     .code(part.getCode())
                     .name(part.getName())
+                    .partUnit(part.getPartUnit())
+                    .baseQuantity(part.getBaseQuantity())
+                    .leadTime(part.getLeadTime())
                     .status(part.getStatus().name())
                     .deleted(false)
                     .groupId(part.getPartGroup().getId())
@@ -194,7 +206,6 @@ public class PartService {
             return new PartListResponseDTO(part);
 
         } catch (OptimisticLockException e) {
-            // ⭐️ 4. 예외가 발생하면 GlobalExceptionHandler가 처리하도록 그냥 re-throw 합니다.
             log.warn("Part 동시 수정 충돌 감지 (partId: {}): {}", partId, e.getMessage());
             throw e;
         }
@@ -217,6 +228,9 @@ public class PartService {
                 .partId(part.getId())
                 .code(part.getCode())
                 .name(part.getName())
+                .partUnit(part.getPartUnit())
+                .baseQuantity(part.getBaseQuantity())
+                .leadTime(part.getLeadTime())
                 .status(part.getStatus().name()) // "DISCONTINUED"
                 .deleted(true)
                 .groupId(part.getPartGroup().getId())
@@ -278,5 +292,58 @@ public class PartService {
 
         return String.format("%s-%s-%03d", categoryCode, groupCode, nextSeq);
     }
+
+    @Transactional
+    public void updateLeadTimeFromProcess(Long partId) {
+
+        Part part = partRepository.findById(partId)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.PART_NOT_FOUND));
+
+        // Process Master 조회
+        Process process = processRepository.findByPartId(partId)
+                .orElse(null);
+
+        // Lead Time 계산
+        Integer newLeadTime = 0;
+        if (process != null) {
+            newLeadTime = process.getTotalStepMinutes();
+        }
+
+        // Part 엔티티 업데이트 및 이벤트 발행 (변경이 있을 경우에만)
+        if (part.getLeadTime() == null || !part.getLeadTime().equals(newLeadTime)) {
+            part.setLeadTime(newLeadTime);
+
+            // DB에 변경사항 반영 (@Version 증가)
+            partRepository.flush();
+
+            // Kafka 이벤트 발행
+            publishPartUpdatedEvent(part);
+        }
+    }
+
+    // 이벤트 발행 헬퍼 메서드
+    private void publishPartUpdatedEvent(Part part) {
+        PartEvent.Payload payload = PartEvent.Payload.builder()
+                .partId(part.getId())
+                .code(part.getCode())
+                .name(part.getName())
+                .partUnit(part.getPartUnit())
+                .baseQuantity(part.getBaseQuantity())
+                .leadTime(part.getLeadTime())
+                .status(part.getStatus().name())
+                .deleted(part.getStatus() == PartStatus.DISCONTINUED)
+                .groupId(part.getPartGroup().getId())
+                .categoryId(part.getPartGroup().getCategory().getId())
+                .build();
+
+        outboxService.saveEvent(
+                "PART",
+                part.getId(),
+                "PartUpdated",
+                part.getVersion(),
+                payload
+        );
+    }
+
 
 }

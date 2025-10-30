@@ -21,6 +21,11 @@ public class Part extends BaseTimeEntity {
 
     private String name; // 부품명
 
+    private String partUnit;  // 기준단위
+
+    private Integer baseQuantity;  // 기준개수
+
+    private Integer leadTime;  // 리드타임 (단위: 일, Days)
 
     @Enumerated(EnumType.STRING)
     private PartStatus status;  // 단종
@@ -34,10 +39,13 @@ public class Part extends BaseTimeEntity {
     private Long version; // 버전 필드 추가
 
     // CSV 로더가 사용할 생성자
-    public Part(String code, String name, PartGroup partGroup) {
+    public Part(String code, String name, PartGroup partGroup, String partUnit, Integer baseQuantity, Integer leadTime) {
         this.code = code;
         this.name = name;
         this.partGroup = partGroup;
+        this.partUnit = partUnit;
+        this.baseQuantity = baseQuantity;
+        this.leadTime = leadTime;
         this.status = PartStatus.ACTIVE;
     }
 
@@ -47,10 +55,29 @@ public class Part extends BaseTimeEntity {
         if (partUpdateRequestDTO.getName() != null) {
             this.name = partUpdateRequestDTO.getName();
         }
+
+        // 기준단위 수정
+        if (partUpdateRequestDTO.getPartUnit() != null) {
+            this.partUnit = partUpdateRequestDTO.getPartUnit();
+        }
+
+        //  기준개수 수정
+        if (partUpdateRequestDTO.getBaseQuantity() != null) {
+            this.baseQuantity = partUpdateRequestDTO.getBaseQuantity();
+        }
+
+        // 리드타임 수정
+        if (partUpdateRequestDTO.getLeadTime() != null) {
+            this.leadTime = partUpdateRequestDTO.getLeadTime();
+        }
     }
 
     // 단종 메서드
     public void delete() {
         this.status = PartStatus.DISCONTINUED;
+    }
+
+    public void setLeadTime(Integer leadTime) {
+        this.leadTime = leadTime;
     }
 }
