@@ -159,6 +159,9 @@ public class MaterialService {
         material.updateBasicInfo(requestDTO.getName(), requestDTO.getMaterialUnit(),
                                 requestDTO.getBaseQuantity(), requestDTO.getLeadTime());
 
+        materialRepository.flush();
+
+
         // 이벤트 발행 - 부품 이벤트와 같은 방식으로 수정
         MaterialEvent.Payload payload = MaterialEvent.Payload.builder()
                 .materialId(material.getId())
