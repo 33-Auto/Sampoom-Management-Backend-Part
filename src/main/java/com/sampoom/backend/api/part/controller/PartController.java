@@ -96,15 +96,15 @@ public class PartController {
         return ApiResponse.success(SuccessStatus.PART_DELETE_SUCCESS, null);
     }
 
-    @Operation(summary = "부품 검색", description = "부품 이름 또는 코드로 검색")
-    @GetMapping("/search")
-    public ResponseEntity<ApiResponse<PageResponseDTO<PartListResponseDTO>>> searchParts(
-            @RequestParam(defaultValue = "") String keyword,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        PageResponseDTO<PartListResponseDTO> partPage = partService.searchParts(keyword, page, size);
-
-        return ApiResponse.success(SuccessStatus.PART_LIST_SUCCESS, partPage);
-    }
+//    @Operation(summary = "부품 검색", description = "부품 이름 또는 코드로 검색")
+//    @GetMapping("/search")
+//    public ResponseEntity<ApiResponse<PageResponseDTO<PartListResponseDTO>>> searchParts(
+//            @RequestParam(defaultValue = "") String keyword,
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "10") int size
+//    ) {
+//        PageResponseDTO<PartListResponseDTO> partPage = partService.searchParts(keyword, page, size);
+//
+//        return ApiResponse.success(SuccessStatus.PART_LIST_SUCCESS, partPage);
+//    }
 }

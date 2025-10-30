@@ -21,7 +21,9 @@ public class ItemResponseDTO {
     private String groupName;
 
     private String unit;
-    private String status;
+
+    private Integer leadTime;
+    private Integer baseQuantity;
 
     public static ItemResponseDTO ofMaterial(MaterialResponseDTO m) {
         return ItemResponseDTO.builder()
@@ -33,6 +35,8 @@ public class ItemResponseDTO {
                 .categoryName(m.getMaterialCategoryName())
                 .groupName(null)  // 자재는 그룹 없음
                 .unit(m.getMaterialUnit())
+                .leadTime(m.getLeadTime())
+                .baseQuantity(m.getBaseQuantity())
                 .build();
     }
 
@@ -46,8 +50,9 @@ public class ItemResponseDTO {
                 .categoryName(p.getCategoryName())
                 .groupId(p.getGroupId())
                 .groupName(p.getGroupName())
-                .unit(null)
-                .status(p.getStatus())
+                .unit(p.getPartUnit())
+                .leadTime(p.getLeadTime())
+                .baseQuantity(p.getBaseQuantity())
                 .build();
     }
 }
