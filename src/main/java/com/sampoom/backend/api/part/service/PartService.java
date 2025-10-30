@@ -180,6 +180,13 @@ public class PartService {
             Part part = partRepository.findById(partId)
                     .orElseThrow(() -> new NotFoundException(ErrorStatus.PART_NOT_FOUND));
 
+            if (partUpdateRequestDTO.getGroupId() != null) {
+                PartGroup newGroup = partGroupRepository.findById(partUpdateRequestDTO.getGroupId())
+                        .orElseThrow(() -> new NotFoundException(ErrorStatus.GROUP_NOT_FOUND));
+
+                part.changeGroup(newGroup); // 엔티티에 추가할 메서드
+            }
+
             part.update(partUpdateRequestDTO);
 
             partRepository.flush();
