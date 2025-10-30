@@ -5,13 +5,14 @@ import com.sampoom.backend.api.part.entity.Part;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
 
-public interface PartRepository extends JpaRepository<Part, Long> {
+public interface PartRepository extends JpaRepository<Part, Long>, JpaSpecificationExecutor<Part> {
 
     // 카테고리별 부품 조회
     Page<Part> findByPartGroupCategoryIdAndStatus(Long categoryId, PartStatus status, Pageable pageable);

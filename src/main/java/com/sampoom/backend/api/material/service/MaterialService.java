@@ -10,12 +10,14 @@ import com.sampoom.backend.api.material.repository.MaterialRepository;
 import com.sampoom.backend.common.dto.PageResponseDTO;
 import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -137,10 +139,31 @@ public class MaterialService {
 
     // 자재 검색
     @Transactional(readOnly = true)
-    public PageResponseDTO<MaterialResponseDTO> searchMaterials(String keyword, int page, int size) {
+    public PageResponseDTO<MaterialResponseDTO> searchMaterials(
+            String keyword,
+            Long categoryId,
+            int page,
+            int size
+    ) {
+        PageRequest pageable = PageRequest.of(page, size);
 
-        PageRequest pageRequest = PageRequest.of(page, size);
-        Page<Material> materials = materialRepository.search(keyword, pageRequest);
+        Page<Material> materials = materialRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // keyword
+            if (keyword != null && !keyword.isBlank()) {
+                Predicate nameLike = cb.like(root.get("name"), "%" + keyword + "%");
+                Predicate codeLike = cb.like(root.get("materialCode"), "%" + keyword + "%");
+                predicates.add(cb.or(nameLike, codeLike));
+            }
+
+            // 카테고리 필터
+            if (categoryId != null) {
+                predicates.add(cb.equal(root.get("materialCategory").get("id"), categoryId));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        }, pageable);
 
         List<MaterialResponseDTO> dtoList = materials.getContent().stream()
                 .map(MaterialResponseDTO::new)
@@ -154,6 +177,7 @@ public class MaterialService {
                 .pageSize(size)
                 .build();
     }
+
 
     @Transactional(readOnly = true)
     public String generateNextMaterialCode(Long categoryId) {

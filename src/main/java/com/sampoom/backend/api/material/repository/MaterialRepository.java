@@ -4,10 +4,11 @@ import com.sampoom.backend.api.material.entity.Material;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface MaterialRepository extends JpaRepository<Material,Long> {
+public interface MaterialRepository extends JpaRepository<Material,Long>, JpaSpecificationExecutor<Material> {
 
     // 카테고리별 자재 조회 (페이지네이션)
     Page<Material> findByMaterialCategoryId(Long categoryId, Pageable pageable);

@@ -17,6 +17,10 @@ public class PartListResponseDTO {
     private String name;
     private String status;
 
+    private String partUnit;
+    private Integer baseQuantity;
+    private Integer leadTime;
+
     private Long groupId;
     private String groupName;
     private Long categoryId;
@@ -27,6 +31,10 @@ public class PartListResponseDTO {
         this.code = part.getCode();
         this.name = part.getName();
         this.status = part.getStatus().name();
+
+        this.partUnit = part.getPartUnit();
+        this.baseQuantity = part.getBaseQuantity();
+        this.leadTime = part.getLeadTime();
 
         this.groupId = part.getPartGroup().getId();
         this.groupName = part.getPartGroup().getName();
