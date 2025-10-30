@@ -35,22 +35,28 @@ public class Process extends BaseTimeEntity {
     private ProcessStatus status;
 
     @Column(nullable = false)
+    @Builder.Default
     private Integer stepCount = 0; // 스텝 수
 
     @Column(nullable = false)
+    @Builder.Default
     private Integer quantity = 1; // 생산량
 
     // 모든 스텝의 총 시간 합계 컬럼들 추가
     @Column(nullable = false)
+    @Builder.Default
     private Integer totalSetupMinutes = 0; // 모든 스텝의 준비시간 합계
 
     @Column(nullable = false)
+    @Builder.Default
     private Integer totalProcessMinutes = 0; // 모든 스텝의 가공시간 합계
 
     @Column(nullable = false)
+    @Builder.Default
     private Integer totalWaitMinutes = 0; // 모든 스텝의 대기시간 합계
 
     @Column(nullable = false)
+    @Builder.Default
     private Integer totalStepMinutes = 0; // 모든 스텝의 총 시간 합계
 
     @OneToMany(mappedBy = "process", cascade = CascadeType.ALL, orphanRemoval = true)

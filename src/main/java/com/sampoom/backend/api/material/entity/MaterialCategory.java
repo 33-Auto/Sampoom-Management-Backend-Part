@@ -20,4 +20,7 @@ public class MaterialCategory {
 
     private String name;
     private String code;
+    @Version
+    private Long version; // JPA가 자동 관리 (낙관적 락 + 자동 증가)
+
 }
