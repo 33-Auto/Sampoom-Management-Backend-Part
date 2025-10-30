@@ -80,4 +80,12 @@ public class Part extends BaseTimeEntity {
     public void setLeadTime(Integer leadTime) {
         this.leadTime = leadTime;
     }
+
+    public void changeGroup(PartGroup newGroup) {
+        this.partGroup = newGroup;
+    }
+
+    public void changeCode(String newCode) {
+        this.code = newCode;
+    }
 }

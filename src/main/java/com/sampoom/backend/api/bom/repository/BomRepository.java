@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface BomRepository extends JpaRepository<Bom,Long> {
+public interface BomRepository extends JpaRepository<Bom, Long> {
 
     @Query("""
 SELECT b FROM Bom b
@@ -42,5 +42,4 @@ ORDER BY b.createdAt DESC
 
     @Query("SELECT DISTINCT b FROM Bom b LEFT JOIN FETCH b.materials m LEFT JOIN FETCH m.material")
     List<Bom> findAllWithMaterials();
-
 }
