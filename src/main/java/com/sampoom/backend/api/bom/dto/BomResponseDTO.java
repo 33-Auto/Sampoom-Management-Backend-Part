@@ -21,6 +21,8 @@ public class BomResponseDTO {
     private String partName;
     private String partCode;
     private Long partId;
+    private String status;
+    private String complexity;
     private List<BomMaterialResponse> materials;  // 자재 구성 목록
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -31,6 +33,8 @@ public class BomResponseDTO {
                 .partId(bom.getPart().getId())
                 .partName(bom.getPart().getName())
                 .partCode(bom.getPart().getCode())
+                .status(bom.getStatus().name())
+                .complexity(bom.getComplexity().name())
                 .materials(bom.getMaterials().stream()
                         .sorted(Comparator.comparing(bm -> bm.getMaterial().getName())) // 이름순 정렬 (선택사항)
                         .map(BomMaterialResponse::from)
