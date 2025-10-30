@@ -107,9 +107,10 @@ public class BomService {
         // 수정일 갱신 후 저장
         bom.touchNow();
 
-        Bom saved =  bomRepository.save(bom);
+        boolean isNew = bom.getId() == null;
+        Bom saved =  bomRepository.saveAndFlush(bom);
 
-        publishBomEvent(saved, "BomCreated");
+        publishBomEvent(saved, isNew ? "BomCreated" : "BomUpdated");
 
         return BomResponseDTO.from(saved);
     }
@@ -173,7 +174,7 @@ public class BomService {
 
         bom.touchNow();
 
-        Bom saved = bomRepository.save(bom);
+        Bom saved = bomRepository.saveAndFlush(bom);
 
         publishBomEvent(saved, "BomUpdated");
 
