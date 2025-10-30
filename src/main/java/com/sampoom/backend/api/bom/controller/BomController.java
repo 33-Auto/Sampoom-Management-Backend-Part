@@ -39,6 +39,7 @@ public class BomController {
             @RequestParam(required = false) BomComplexity complexity,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
+
         return ApiResponse.success(SuccessStatus.OK, bomService.searchBoms(null, categoryId, groupId, status, complexity, page, size));
     }
 

@@ -42,5 +42,4 @@ ORDER BY b.createdAt DESC
 
     @Query("SELECT DISTINCT b FROM Bom b LEFT JOIN FETCH b.materials m LEFT JOIN FETCH m.material")
     List<Bom> findAllWithMaterials();
-
 }
