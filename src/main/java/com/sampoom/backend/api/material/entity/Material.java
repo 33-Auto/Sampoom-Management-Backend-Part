@@ -33,6 +33,9 @@ public class Material {
     @ManyToOne(fetch = FetchType.LAZY)
     private MaterialCategory materialCategory;
 
+    @Version
+    private Long version; // JPA가 자동 관리 (낙관적 락 + 자동 증가)
+
     /** 이름/단위/기준단위/리드타임 수정 */
     public void updateBasicInfo(String name, String unit, Integer baseQuantity, Integer leadTime) {
         this.name = name;

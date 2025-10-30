@@ -5,8 +5,10 @@ import com.sampoom.backend.api.material.dto.MaterialRequestDTO;
 import com.sampoom.backend.api.material.dto.MaterialResponseDTO;
 import com.sampoom.backend.api.material.entity.Material;
 import com.sampoom.backend.api.material.entity.MaterialCategory;
+import com.sampoom.backend.api.material.event.dto.MaterialEvent;
 import com.sampoom.backend.api.material.repository.MaterialCategoryRepository;
 import com.sampoom.backend.api.material.repository.MaterialRepository;
+import com.sampoom.backend.api.part.event.service.OutboxService;
 import com.sampoom.backend.common.dto.PageResponseDTO;
 import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
@@ -17,8 +19,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,6 +31,7 @@ public class MaterialService {
 
     private final MaterialRepository materialRepository;
     private final MaterialCategoryRepository categoryRepository;
+    private final OutboxService outboxService;
 
     // 카테고리 목록 조회
     @Transactional(readOnly = true)
@@ -101,6 +106,34 @@ public class MaterialService {
 
         materialRepository.save(material);
 
+        // 이벤트 발행 - 부품 이벤트와 같은 방식으로 수정
+        MaterialEvent.Payload payload = MaterialEvent.Payload.builder()
+                .materialId(material.getId())
+                .materialCode(material.getMaterialCode())
+                .name(material.getName())
+                .materialUnit(material.getMaterialUnit())
+                .baseQuantity(material.getBaseQuantity())
+                .leadTime(material.getLeadTime())
+                .deleted(false)
+                .materialCategoryId(category.getId())
+                .build();
+
+        MaterialEvent event = MaterialEvent.builder()
+                .eventId(UUID.randomUUID().toString())
+                .eventType("MaterialCreated")
+                .version(material.getVersion())
+                .occurredAt(OffsetDateTime.now().toString())
+                .payload(payload)
+                .build();
+
+        outboxService.saveEvent(
+                "MATERIAL",
+                material.getId(),
+                "MaterialCreated",
+                material.getVersion(),
+                event.getPayload() // event 전체가 아닌 payload만 전달
+        );
+
         return new MaterialResponseDTO(material);
     }
 
@@ -126,6 +159,34 @@ public class MaterialService {
         material.updateBasicInfo(requestDTO.getName(), requestDTO.getMaterialUnit(),
                                 requestDTO.getBaseQuantity(), requestDTO.getLeadTime());
 
+        // 이벤트 발행 - 부품 이벤트와 같은 방식으로 수정
+        MaterialEvent.Payload payload = MaterialEvent.Payload.builder()
+                .materialId(material.getId())
+                .materialCode(material.getMaterialCode())
+                .name(material.getName())
+                .materialUnit(material.getMaterialUnit())
+                .baseQuantity(material.getBaseQuantity())
+                .leadTime(material.getLeadTime())
+                .deleted(false)
+                .materialCategoryId(material.getMaterialCategory().getId())
+                .build();
+
+        MaterialEvent event = MaterialEvent.builder()
+                .eventId(UUID.randomUUID().toString())
+                .eventType("MaterialUpdated")
+                .version(material.getVersion())
+                .occurredAt(OffsetDateTime.now().toString())
+                .payload(payload)
+                .build();
+
+        outboxService.saveEvent(
+                "MATERIAL",
+                material.getId(),
+                "MaterialUpdated",
+                material.getVersion(),
+                event.getPayload() // event 전체가 아닌 payload만 전달
+        );
+
         return new MaterialResponseDTO(material);
     }
 
@@ -134,6 +195,35 @@ public class MaterialService {
     public void deleteMaterial(Long id) {
         Material material = materialRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.MATERIAL_NOT_FOUND));
+
+        // 이벤트 발행 (삭제 전에) - 부품 이벤트와 같은 방식으로 수정
+        MaterialEvent.Payload payload = MaterialEvent.Payload.builder()
+                .materialId(material.getId())
+                .materialCode(material.getMaterialCode())
+                .name(material.getName())
+                .materialUnit(material.getMaterialUnit())
+                .baseQuantity(material.getBaseQuantity())
+                .leadTime(material.getLeadTime())
+                .deleted(true)
+                .materialCategoryId(material.getMaterialCategory().getId())
+                .build();
+
+        MaterialEvent event = MaterialEvent.builder()
+                .eventId(UUID.randomUUID().toString())
+                .eventType("MaterialDeleted")
+                .version(material.getVersion())
+                .occurredAt(OffsetDateTime.now().toString())
+                .payload(payload)
+                .build();
+
+        outboxService.saveEvent(
+                "MATERIAL",
+                material.getId(),
+                "MaterialDeleted",
+                material.getVersion(),
+                event.getPayload() // event 전체가 아닌 payload만 전달
+        );
+
         materialRepository.delete(material);
     }
 

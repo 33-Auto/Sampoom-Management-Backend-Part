@@ -1,6 +1,7 @@
 package com.sampoom.backend.api.part.event.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sampoom.backend.api.material.event.dto.MaterialCategoryEvent;
 import com.sampoom.backend.api.part.event.dto.PartCategoryEvent;
 import com.sampoom.backend.api.part.event.dto.PartEvent;
 import com.sampoom.backend.api.part.event.dto.PartGroupEvent;
@@ -24,6 +25,8 @@ public class OutboxEventProcessor {
     private static final String TOPIC_PART = "part-events";
     private static final String TOPIC_PART_GROUP = "part-group-events";
     private static final String TOPIC_PART_CATEGORY = "part-category-events";
+    private static final String TOPIC_MATERIAL = "material-events"; // 자재 토픽 추가
+    private static final String TOPIC_MATERIAL_CATEGORY = "material-category-events";
 
     private final OutboxRepository outboxRepository;
     private final KafkaTemplate<String, Object> kafkaTemplate;
@@ -76,6 +79,31 @@ public class OutboxEventProcessor {
                             .build();
                     topicName = TOPIC_PART_CATEGORY;
                     break;
+
+                case "MATERIAL":
+                    com.sampoom.backend.api.material.event.dto.MaterialEvent.Payload materialPayload = objectMapper.readValue(outbox.getPayload(), com.sampoom.backend.api.material.event.dto.MaterialEvent.Payload.class);
+                    eventToSend = com.sampoom.backend.api.material.event.dto.MaterialEvent.builder()
+                            .eventId(outbox.getEventId())
+                            .eventType(outbox.getEventType())
+                            .version(outbox.getVersion())
+                            .occurredAt(outbox.getOccurredAt().toString())
+                            .payload(materialPayload)
+                            .build();
+                    topicName = TOPIC_MATERIAL;
+                    break;
+
+                case "MATERIAL_CATEGORY":
+                    MaterialCategoryEvent.Payload materialCategoryPayload = objectMapper.readValue(outbox.getPayload(),  MaterialCategoryEvent.Payload.class);
+                    eventToSend = com.sampoom.backend.api.material.event.dto.MaterialCategoryEvent.builder()
+                            .eventId(outbox.getEventId())
+                            .eventType(outbox.getEventType())
+                            .version(outbox.getVersion())
+                            .occurredAt(outbox.getOccurredAt().toString())
+                            .payload(materialCategoryPayload)
+                            .build();
+                    topicName = TOPIC_MATERIAL_CATEGORY;
+                    break;
+
 
                 default:
                     throw new IllegalStateException("알 수 없는 AggregateType: " + outbox.getAggregateType());
