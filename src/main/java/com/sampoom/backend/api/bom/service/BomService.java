@@ -4,7 +4,9 @@ import com.sampoom.backend.api.bom.dto.BomDetailResponseDTO;
 import com.sampoom.backend.api.bom.dto.BomRequestDTO;
 import com.sampoom.backend.api.bom.dto.BomResponseDTO;
 import com.sampoom.backend.api.bom.entity.Bom;
+import com.sampoom.backend.api.bom.entity.BomComplexity;
 import com.sampoom.backend.api.bom.entity.BomMaterial;
+import com.sampoom.backend.api.bom.entity.BomStatus;
 import com.sampoom.backend.api.bom.repository.BomRepository;
 import com.sampoom.backend.api.material.entity.Material;
 import com.sampoom.backend.api.material.repository.MaterialRepository;
@@ -45,6 +47,8 @@ public class BomService {
                 .orElseGet(() -> Bom.builder()
                         .part(part)
                         .materials(new ArrayList<>())
+                        .status(BomStatus.PENDING_APPROVAL)
+                        .complexity(BomComplexity.SIMPLE)
                         .build());
 
         // 기존 자재를 Map으로 변환 (id 기준)
@@ -94,6 +98,9 @@ public class BomService {
         // 요청에서 빠진 자재 제거
         bom.getMaterials().clear();
         bom.getMaterials().addAll(newMaterialList);
+
+        // 복잡도 자동 계산
+        bom.calculateComplexity();
 
         // 수정일 갱신 후 저장
         bom.touchNow();
@@ -154,6 +161,10 @@ public class BomService {
             bom.addMaterial(bomMaterial);
         }
 
+
+        // 복잡도 재계산
+        bom.calculateComplexity();
+
         bom.touchNow();
 
         return BomResponseDTO.from(bom);
@@ -169,9 +180,24 @@ public class BomService {
     }
 
     // BOM 검색
-    public PageResponseDTO<BomResponseDTO> searchBoms(String keyword, Long categoryId, Long groupId, int page, int size) {
+    public PageResponseDTO<BomResponseDTO> searchBoms(
+            String keyword,
+            Long categoryId,
+            Long groupId,
+            BomStatus status,
+            BomComplexity complexity,
+            int page,
+            int size
+    ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Bom> bomPage = bomRepository.findByFilters(keyword, categoryId, groupId, pageable);
+        Page<Bom> bomPage = bomRepository.findByFilters(
+                keyword,
+                categoryId,
+                groupId,
+                status,
+                complexity,
+                pageable
+        );
 
         return PageResponseDTO.<BomResponseDTO>builder()
                 .content(bomPage.getContent().stream()
@@ -182,5 +208,16 @@ public class BomService {
                 .currentPage(bomPage.getNumber())
                 .pageSize(bomPage.getSize())
                 .build();
+    }
+
+    /**
+     * BOM 상태 변경 (활성/비활성 등)
+     */
+    @Transactional
+    public void updateBomStatus(Long bomId, BomStatus newStatus) {
+        Bom bom = bomRepository.findById(bomId)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.BOM_NOT_FOUND));
+        bom.updateStatus(newStatus);
+        bomRepository.save(bom);
     }
 }
