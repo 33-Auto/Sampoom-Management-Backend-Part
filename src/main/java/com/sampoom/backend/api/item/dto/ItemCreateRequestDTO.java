@@ -1,7 +1,9 @@
 package com.sampoom.backend.api.item.dto;
 
+import com.sampoom.backend.api.item.enums.ItemType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,8 +13,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ItemCreateRequestDTO {
 
-    @NotBlank(message = "품목 유형은 필수입니다.")
-    private String itemType; // PART or MATERIAL
+    @NotNull(message = "품목 유형은 필수입니다.")
+    private ItemType itemType; // PART or MATERIAL
 
     @NotBlank(message = "품목명은 필수입니다.")
     private String name;
@@ -29,5 +31,6 @@ public class ItemCreateRequestDTO {
     private Integer baseQuantity;
 
     @NotNull(message = "리드타임은 필수입니다.")
+    @PositiveOrZero(message = "리드타임은 0 이상이어야 합니다.")
     private Integer leadTime;
 }

@@ -84,4 +84,8 @@ public class Part extends BaseTimeEntity {
     public void changeGroup(PartGroup newGroup) {
         this.partGroup = newGroup;
     }
+
+    public void changeCode(String newCode) {
+        this.code = newCode;
+    }
 }
