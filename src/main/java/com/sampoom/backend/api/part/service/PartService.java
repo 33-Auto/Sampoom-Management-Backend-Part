@@ -122,8 +122,7 @@ public class PartService {
                         partCreateRequestDTO.getName(),
                         partGroup,
                         partCreateRequestDTO.getPartUnit(),
-                        partCreateRequestDTO.getBaseQuantity(),
-                        PartStatus.ACTIVE
+                        partCreateRequestDTO.getBaseQuantity()
                 );
 
                 // 표준단가 자동 계산

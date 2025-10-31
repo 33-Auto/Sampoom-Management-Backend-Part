@@ -35,8 +35,6 @@ public class Material {
     @ManyToOne(fetch = FetchType.LAZY)
     private MaterialCategory materialCategory;
 
-
-    @Column(precision = 15)
     private Long standardCost; // 표준단가
 
     @Version

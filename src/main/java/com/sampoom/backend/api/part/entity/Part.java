@@ -43,7 +43,7 @@ public class Part extends BaseTimeEntity {
     @Column(nullable = false)
     private Long version; // 버전 필드 추가
 
-    public Part(String code, String name, PartGroup partGroup, String partUnit, Integer baseQuantity, PartStatus status) {
+    public Part(String code, String name, PartGroup partGroup, String partUnit, Integer baseQuantity) {
         this.code = code;
         this.name = name;
         this.partGroup = partGroup;
