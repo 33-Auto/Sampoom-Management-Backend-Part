@@ -1,6 +1,7 @@
 package com.sampoom.backend.api.part.event.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sampoom.backend.api.bom.event.dto.BomEvent;
 import com.sampoom.backend.api.material.event.dto.MaterialCategoryEvent;
 import com.sampoom.backend.api.part.event.dto.PartCategoryEvent;
 import com.sampoom.backend.api.part.event.dto.PartEvent;
@@ -27,6 +28,7 @@ public class OutboxEventProcessor {
     private static final String TOPIC_PART_CATEGORY = "part-category-events";
     private static final String TOPIC_MATERIAL = "material-events"; // 자재 토픽 추가
     private static final String TOPIC_MATERIAL_CATEGORY = "material-category-events";
+    private static final String TOPIC_BOM = "bom-events";
 
     private final OutboxRepository outboxRepository;
     private final KafkaTemplate<String, Object> kafkaTemplate;
@@ -78,6 +80,19 @@ public class OutboxEventProcessor {
                             .payload(categoryPayload)
                             .build();
                     topicName = TOPIC_PART_CATEGORY;
+                    break;
+
+                case "BOM":
+                    BomEvent.Payload bomPayload =
+                            objectMapper.readValue(outbox.getPayload(), BomEvent.Payload.class);
+                    eventToSend = BomEvent.builder()
+                            .eventId(outbox.getEventId())
+                            .eventType(outbox.getEventType())
+                            .version(outbox.getVersion())
+                            .occurredAt(outbox.getOccurredAt().toString())
+                            .payload(bomPayload)
+                            .build();
+                    topicName = TOPIC_BOM;
                     break;
 
                 case "MATERIAL":

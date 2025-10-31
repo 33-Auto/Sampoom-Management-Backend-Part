@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface BomRepository extends JpaRepository<Bom, Long> {
@@ -38,4 +39,7 @@ ORDER BY b.createdAt DESC
             Pageable pageable);
 
     Optional<Bom> findByPart_Id(Long partId);
+
+    @Query("SELECT DISTINCT b FROM Bom b LEFT JOIN FETCH b.materials m LEFT JOIN FETCH m.material")
+    List<Bom> findAllWithMaterials();
 }

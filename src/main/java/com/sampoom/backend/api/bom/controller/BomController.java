@@ -35,9 +35,12 @@ public class BomController {
     public ResponseEntity<ApiResponse<PageResponseDTO<BomResponseDTO>>> getBoms(
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) Long groupId,
+            @RequestParam(required = false) BomStatus status,
+            @RequestParam(required = false) BomComplexity complexity,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        return ApiResponse.success(SuccessStatus.OK, bomService.searchBoms(null, categoryId, groupId, null, null, page, size));
+
+        return ApiResponse.success(SuccessStatus.OK, bomService.searchBoms(null, categoryId, groupId, status, complexity, page, size));
     }
 
     @Operation(summary = "BOM 상세 조회", description = "특정 BOM의 상세 정보를 조회합니다.")

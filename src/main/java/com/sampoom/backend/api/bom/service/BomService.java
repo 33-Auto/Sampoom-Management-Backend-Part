@@ -7,10 +7,12 @@ import com.sampoom.backend.api.bom.entity.Bom;
 import com.sampoom.backend.api.bom.entity.BomComplexity;
 import com.sampoom.backend.api.bom.entity.BomMaterial;
 import com.sampoom.backend.api.bom.entity.BomStatus;
+import com.sampoom.backend.api.bom.event.dto.BomEvent;
 import com.sampoom.backend.api.bom.repository.BomRepository;
 import com.sampoom.backend.api.material.entity.Material;
 import com.sampoom.backend.api.material.repository.MaterialRepository;
 import com.sampoom.backend.api.part.entity.Part;
+import com.sampoom.backend.api.part.event.service.OutboxService;
 import com.sampoom.backend.api.part.repository.PartRepository;
 import com.sampoom.backend.common.dto.PageResponseDTO;
 import com.sampoom.backend.common.exception.NotFoundException;
@@ -23,9 +25,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.time.OffsetDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,6 +35,7 @@ public class BomService {
     private final BomRepository bomRepository;
     private final PartRepository partRepository;
     private final MaterialRepository materialRepository;
+    private final OutboxService outboxService;
 
 
     // BOM 생성
@@ -105,7 +107,12 @@ public class BomService {
         // 수정일 갱신 후 저장
         bom.touchNow();
 
-        return BomResponseDTO.from(bomRepository.save(bom));
+        boolean isNew = bom.getId() == null;
+        Bom saved =  bomRepository.saveAndFlush(bom);
+
+        publishBomEvent(saved, isNew ? "BomCreated" : "BomUpdated");
+
+        return BomResponseDTO.from(saved);
     }
 
 
@@ -167,7 +174,11 @@ public class BomService {
 
         bom.touchNow();
 
-        return BomResponseDTO.from(bom);
+        Bom saved = bomRepository.saveAndFlush(bom);
+
+        publishBomEvent(saved, "BomUpdated");
+
+        return BomResponseDTO.from(saved);
     }
 
     // BOM 삭제
@@ -177,7 +188,81 @@ public class BomService {
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.BOM_NOT_FOUND));
 
         bomRepository.delete(bom);
+
+        publishBomDeletedEvent(bom);
     }
+
+
+    /** ----------------------------
+     * Outbox 이벤트 발행 메서드
+     * ---------------------------- */
+    private void publishBomEvent(Bom bom, String eventType) {
+        BomEvent.Payload payload = BomEvent.Payload.builder()
+                .bomId(bom.getId())
+                .partId(bom.getPart().getId())
+                .partCode(bom.getPart().getCode())
+                .partName(bom.getPart().getName())
+                .status(bom.getStatus().name())
+                .complexity(bom.getComplexity().name())
+                .deleted(false)
+                .materials(bom.getMaterials().stream()
+                        .map(m -> BomEvent.Payload.MaterialInfo.builder()
+                                .materialId(m.getMaterial().getId())
+                                .materialName(m.getMaterial().getName())
+                                .materialCode(m.getMaterial().getMaterialCode())
+                                .unit(m.getMaterial().getMaterialUnit())
+                                .quantity(m.getQuantity())
+                                .build())
+                        .toList())
+                .build();
+
+        BomEvent event = BomEvent.builder()
+                .eventId(UUID.randomUUID().toString())
+                .eventType(eventType)
+                .version(bom.getVersion())
+                .occurredAt(OffsetDateTime.now().toString())
+                .payload(payload)
+                .build();
+
+        outboxService.saveEvent(
+                "BOM",
+                bom.getId(),
+                eventType,
+                bom.getVersion(),
+                event.getPayload()
+        );
+    }
+
+    private void publishBomDeletedEvent(Bom bom) {
+        BomEvent.Payload payload = BomEvent.Payload.builder()
+                .bomId(bom.getId())
+                .partId(bom.getPart().getId())
+                .partCode(bom.getPart().getCode())
+                .partName(bom.getPart().getName())
+                .status("DELETED")
+                .complexity(bom.getComplexity().name())
+                .deleted(true)
+                .materials(Collections.emptyList())
+                .build();
+
+        BomEvent event = BomEvent.builder()
+                .eventId(UUID.randomUUID().toString())
+                .eventType("BomDeleted")
+                .version(bom.getVersion())
+                .occurredAt(OffsetDateTime.now().toString())
+                .payload(payload)
+                .build();
+
+        outboxService.saveEvent(
+                "BOM",
+                bom.getId(),
+                "BomDeleted",
+                bom.getVersion(),
+                event.getPayload()
+        );
+    }
+
+
 
     // BOM 검색
     public PageResponseDTO<BomResponseDTO> searchBoms(

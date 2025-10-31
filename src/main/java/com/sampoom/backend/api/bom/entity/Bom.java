@@ -42,6 +42,9 @@ public class Bom extends BaseTimeEntity {
     @Builder.Default
     private BomComplexity complexity = BomComplexity.SIMPLE;
 
+    @Version
+    private Long version;
+
     public void addMaterial(BomMaterial bomMaterial) {
         this.materials.add(bomMaterial);
 
