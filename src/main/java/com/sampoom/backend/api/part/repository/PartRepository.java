@@ -44,4 +44,9 @@ where p.status = :status
     // N+1 방지 (Part -> PartGroup -> PartCategory)
     @Query("SELECT p FROM Part p JOIN FETCH p.partGroup g JOIN FETCH g.category c")
     List<Part> findAllForBootstrap();
+
+    @Query("SELECT p FROM Part p " +
+            "LEFT JOIN FETCH p.partGroup g " +
+            "LEFT JOIN FETCH g.category c")
+    List<Part> findAllWithGroupAndCategory();
 }

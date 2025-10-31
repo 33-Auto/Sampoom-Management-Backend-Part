@@ -32,5 +32,7 @@ public class PartEvent {
 
         private Long groupId;
         private Long categoryId;
+
+        private Long standardCost;
     }
 }
