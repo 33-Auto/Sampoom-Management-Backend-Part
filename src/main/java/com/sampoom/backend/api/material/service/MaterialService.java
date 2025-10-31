@@ -8,6 +8,7 @@ import com.sampoom.backend.api.material.entity.MaterialCategory;
 import com.sampoom.backend.api.material.event.dto.MaterialEvent;
 import com.sampoom.backend.api.material.repository.MaterialCategoryRepository;
 import com.sampoom.backend.api.material.repository.MaterialRepository;
+import com.sampoom.backend.api.part.entity.ProcurementType;
 import com.sampoom.backend.api.part.event.service.OutboxService;
 import com.sampoom.backend.common.dto.PageResponseDTO;
 import com.sampoom.backend.common.exception.NotFoundException;
@@ -19,9 +20,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -102,6 +105,8 @@ public class MaterialService {
                 .baseQuantity(requestDTO.getBaseQuantity())
                 .leadTime(requestDTO.getLeadTime())
                 .materialCategory(category)
+                .procurementType(Optional.ofNullable(requestDTO.getProcurementType()).orElse(ProcurementType.PURCHASE))
+                .standardCost(Optional.ofNullable(requestDTO.getStandardCost()).orElse(BigDecimal.ZERO))
                 .build();
 
         materialRepository.save(material);
@@ -156,8 +161,14 @@ public class MaterialService {
         }
 
         // 나머지 필드 수정
-        material.updateBasicInfo(requestDTO.getName(), requestDTO.getMaterialUnit(),
-                                requestDTO.getBaseQuantity(), requestDTO.getLeadTime());
+        material.updateBasicInfo(
+                requestDTO.getName(),
+                requestDTO.getMaterialUnit(),
+                requestDTO.getBaseQuantity(),
+                requestDTO.getLeadTime(),
+                requestDTO.getProcurementType(),
+                requestDTO.getStandardCost()
+        );
 
         materialRepository.flush();
 

@@ -1,10 +1,13 @@
 package com.sampoom.backend.api.material.entity;
 
+import com.sampoom.backend.api.part.entity.ProcurementType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "material_master")
@@ -28,20 +31,28 @@ public class Material {
     private Integer baseQuantity; // 기준단위 (몇개씩 넣을지)
 
     @Column(name = "lead_time")
-    private Integer leadTime; // 리드타임 (일 단위)
+    private Integer leadTime; // 리드타임
 
     @ManyToOne(fetch = FetchType.LAZY)
     private MaterialCategory materialCategory;
+
+    @Enumerated(EnumType.STRING)
+    private ProcurementType procurementType; // 조달유형 (구매/제작)
+
+    @Column(precision = 15)
+    private BigDecimal standardCost; // 표준단가
 
     @Version
     private Long version; // JPA가 자동 관리 (낙관적 락 + 자동 증가)
 
     /** 이름/단위/기준단위/리드타임 수정 */
-    public void updateBasicInfo(String name, String unit, Integer baseQuantity, Integer leadTime) {
+    public void updateBasicInfo(String name, String unit, Integer baseQuantity, Integer leadTime, ProcurementType procurementType, BigDecimal standardCost) {
         this.name = name;
         this.materialUnit = unit;
         this.baseQuantity = baseQuantity;
         this.leadTime = leadTime;
+        this.procurementType = procurementType;
+        this.standardCost = standardCost;
     }
 
     /** 카테고리 변경 + 코드 재발급 */
