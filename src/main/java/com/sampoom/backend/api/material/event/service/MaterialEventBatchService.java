@@ -37,6 +37,7 @@ public class MaterialEventBatchService {
                         .materialUnit(material.getMaterialUnit())
                         .baseQuantity(material.getBaseQuantity())
                         .leadTime(material.getLeadTime())
+                        .standardCost(material.getStandardCost())
                         .deleted(false)
                         .materialCategoryId(material.getMaterialCategory().getId())
 
@@ -63,6 +64,7 @@ public class MaterialEventBatchService {
 
     public void publishAllMaterialCategoryEvents() {
         List<MaterialCategory> categories = materialCategoryRepository.findAll();
+
         for (MaterialCategory category : categories) {
             try {
                 MaterialCategoryEvent.Payload payload = MaterialCategoryEvent.Payload.builder()
