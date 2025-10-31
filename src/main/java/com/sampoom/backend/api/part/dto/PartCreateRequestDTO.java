@@ -1,6 +1,5 @@
 package com.sampoom.backend.api.part.dto;
 
-import com.sampoom.backend.api.part.entity.ProcurementType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -28,9 +27,4 @@ public class PartCreateRequestDTO {
 
     @NotNull(message = "리드 타임은 필수입니다.")
     private Integer leadTime;
-
-    @NotNull(message = "표준 단가는 필수입니다.")
-    private BigDecimal standardCost;
-
-    private ProcurementType procurementType = ProcurementType.MANUFACTURE; // 기본값: 생산
 }

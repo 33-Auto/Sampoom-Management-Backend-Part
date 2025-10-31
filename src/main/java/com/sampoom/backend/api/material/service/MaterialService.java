@@ -8,7 +8,6 @@ import com.sampoom.backend.api.material.entity.MaterialCategory;
 import com.sampoom.backend.api.material.event.dto.MaterialEvent;
 import com.sampoom.backend.api.material.repository.MaterialCategoryRepository;
 import com.sampoom.backend.api.material.repository.MaterialRepository;
-import com.sampoom.backend.api.part.entity.ProcurementType;
 import com.sampoom.backend.api.part.event.service.OutboxService;
 import com.sampoom.backend.common.dto.PageResponseDTO;
 import com.sampoom.backend.common.exception.NotFoundException;
@@ -105,7 +104,6 @@ public class MaterialService {
                 .baseQuantity(requestDTO.getBaseQuantity())
                 .leadTime(requestDTO.getLeadTime())
                 .materialCategory(category)
-                .procurementType(Optional.ofNullable(requestDTO.getProcurementType()).orElse(ProcurementType.PURCHASE))
                 .standardCost(Optional.ofNullable(requestDTO.getStandardCost()).orElse(BigDecimal.ZERO))
                 .build();
 
@@ -166,7 +164,6 @@ public class MaterialService {
                 requestDTO.getMaterialUnit(),
                 requestDTO.getBaseQuantity(),
                 requestDTO.getLeadTime(),
-                requestDTO.getProcurementType(),
                 requestDTO.getStandardCost()
         );
 

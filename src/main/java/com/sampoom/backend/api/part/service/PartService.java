@@ -124,15 +124,10 @@ public class PartService {
                         partCreateRequestDTO.getPartUnit(),
                         partCreateRequestDTO.getBaseQuantity(),
                         partCreateRequestDTO.getLeadTime(),
-                        partCreateRequestDTO.getStandardCost(),
                         PartStatus.ACTIVE
                 );
 
-                if (partCreateRequestDTO.getProcurementType() != null) {
-                    newPart.changeProcurementType(partCreateRequestDTO.getProcurementType());
-                } else {
-                    newPart.changeProcurementType(ProcurementType.MANUFACTURE);
-                }
+                // 표준단가 자동 계산
 
                 savedPart = partRepository.saveAndFlush(newPart);
                 break;
@@ -200,6 +195,9 @@ public class PartService {
             }
 
             part.update(partUpdateRequestDTO);
+
+            // 표준단가 계산
+
             partRepository.flush();
 
             PartEvent.Payload payload = PartEvent.Payload.builder()

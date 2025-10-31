@@ -32,12 +32,8 @@ public class Part extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private PartStatus status;  // 단종
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ProcurementType procurementType; // 조달 유형 (생산/긴급/구매)
-
     @Column(precision = 15)
-    private BigDecimal standardCost; // 표준 단가
+    private BigDecimal standardCost; // 표준 단가 (자동 계산)
 
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -49,7 +45,7 @@ public class Part extends BaseTimeEntity {
     private Long version; // 버전 필드 추가
 
     // CSV 로더가 사용할 생성자
-    public Part(String code, String name, PartGroup partGroup, String partUnit, Integer baseQuantity, Integer leadTime, BigDecimal standardCost, PartStatus status) {
+    public Part(String code, String name, PartGroup partGroup, String partUnit, Integer baseQuantity, Integer leadTime, PartStatus status) {
         this.code = code;
         this.name = name;
         this.partGroup = partGroup;
@@ -57,7 +53,6 @@ public class Part extends BaseTimeEntity {
         this.baseQuantity = baseQuantity;
         this.leadTime = leadTime;
         this.status = PartStatus.ACTIVE;
-        this.procurementType = ProcurementType.MANUFACTURE; // 기본값: 생산
         this.standardCost = standardCost;
     }
 
@@ -82,16 +77,6 @@ public class Part extends BaseTimeEntity {
         if (partUpdateRequestDTO.getLeadTime() != null) {
             this.leadTime = partUpdateRequestDTO.getLeadTime();
         }
-
-        // 조달유형 수정
-        if (partUpdateRequestDTO.getProcurementType() != null) {
-            this.procurementType = partUpdateRequestDTO.getProcurementType();
-        }
-
-        // 표준단가 수정
-        if (partUpdateRequestDTO.getStandardCost() != null) {
-            this.standardCost = partUpdateRequestDTO.getStandardCost();
-        }
     }
 
     // 단종 메서드
@@ -109,9 +94,5 @@ public class Part extends BaseTimeEntity {
 
     public void changeCode(String newCode) {
         this.code = newCode;
-    }
-
-    public void changeProcurementType(ProcurementType newType) {
-        this.procurementType = newType;
     }
 }

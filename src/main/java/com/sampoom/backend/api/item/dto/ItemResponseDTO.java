@@ -25,6 +25,7 @@ public class ItemResponseDTO {
     private Integer leadTime;
     private Integer baseQuantity;
 
+
     public static ItemResponseDTO ofMaterial(MaterialResponseDTO m) {
         return ItemResponseDTO.builder()
                 .id(m.getId())

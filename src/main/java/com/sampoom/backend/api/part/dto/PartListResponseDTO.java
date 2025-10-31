@@ -24,7 +24,6 @@ public class PartListResponseDTO {
     private Integer leadTime;
 
     private BigDecimal standardCost;
-    private String procurementType;
 
     private Long groupId;
     private String groupName;
@@ -42,7 +41,6 @@ public class PartListResponseDTO {
         this.leadTime = part.getLeadTime();
 
         this.standardCost = part.getStandardCost();
-        this.procurementType = part.getProcurementType().name();
 
         this.groupId = part.getPartGroup().getId();
         this.groupName = part.getPartGroup().getName();

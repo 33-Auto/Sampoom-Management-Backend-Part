@@ -1,7 +1,6 @@
 package com.sampoom.backend.api.material.dto;
 
 import com.sampoom.backend.api.material.entity.Material;
-import com.sampoom.backend.api.part.entity.ProcurementType;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -19,7 +18,6 @@ public class MaterialResponseDTO {
     private Integer baseQuantity;  // 기준단위
     private Integer leadTime;      // 리드타임
 
-    private ProcurementType procurementType; // 조달유형
     private BigDecimal standardCost;         // 표준단가
 
     private Long materialCategoryId;
@@ -32,7 +30,6 @@ public class MaterialResponseDTO {
         this.materialUnit = material.getMaterialUnit();
         this.baseQuantity = material.getBaseQuantity();
         this.leadTime = material.getLeadTime();
-        this.procurementType = material.getProcurementType();
         this.standardCost = material.getStandardCost();
 
         if (material.getMaterialCategory() != null) {
