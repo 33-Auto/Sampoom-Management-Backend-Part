@@ -15,6 +15,7 @@ import com.sampoom.backend.api.part.entity.Part;
 import com.sampoom.backend.api.part.event.service.OutboxService;
 import com.sampoom.backend.api.part.repository.PartRepository;
 import com.sampoom.backend.common.dto.PageResponseDTO;
+import com.sampoom.backend.common.exception.BadRequestException;
 import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
@@ -40,22 +41,16 @@ public class BomService {
 
     // BOM 생성
     @Transactional
-    public BomResponseDTO createOrUpdateBom(BomRequestDTO requestDTO) {
+    public BomResponseDTO createBom(BomRequestDTO requestDTO) {
+
+        // 부품 존재 여부 확인
         Part part = partRepository.findById(requestDTO.getPartId())
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.PART_NOT_FOUND));
 
-        // 기존 BOM 가져오거나 새로 생성
-        Bom bom = bomRepository.findByPart_Id(part.getId())
-                .orElseGet(() -> Bom.builder()
-                        .part(part)
-                        .materials(new ArrayList<>())
-                        .status(BomStatus.PENDING_APPROVAL)
-                        .complexity(BomComplexity.SIMPLE)
-                        .build());
-
-        // 기존 자재를 Map으로 변환 (id 기준)
-        Map<Long, BomMaterial> existingMaterials = bom.getMaterials().stream()
-                .collect(Collectors.toMap(m -> m.getMaterial().getId(), m -> m));
+        // 기존 BOM 존재 시 등록 불가
+        if (bomRepository.existsByPart_Id(part.getId())) {
+            throw new BadRequestException(ErrorStatus.DUPLICATE_BOM);
+        }
 
         // 요청 자재 중복 제거 및 수량 합산
         Map<Long, Long> idToQty = requestDTO.getMaterials().stream()
@@ -72,45 +67,74 @@ public class BomService {
             throw new NotFoundException(ErrorStatus.MATERIAL_NOT_FOUND);
         }
 
-        Map<Long, Material> matMap = materials.stream()
-                .collect(Collectors.toMap(Material::getId, m -> m));
-
         // BOM 자재 리스트 구성
-        List<BomMaterial> newMaterialList = new ArrayList<>();
+//        List<BomMaterial> newMaterialList = new ArrayList<>();
+//
+//        for (Map.Entry<Long, Long> entry : idToQty.entrySet()) {
+//            Long materialId = entry.getKey();
+//            Long quantity = entry.getValue();
+//            Material material = matMap.get(materialId);
+//
+//            BomMaterial existing = existingMaterials.get(materialId);
+//            if (existing != null) {
+//                existing.updateQuantity(quantity);
+//                newMaterialList.add(existing);
+//            } else {
+//                BomMaterial newMat = BomMaterial.builder()
+//                        .bom(bom)
+//                        .material(material)
+//                        .quantity(quantity)
+//                        .build();
+//                newMaterialList.add(newMat);
+//            }
+//        }
 
-        for (Map.Entry<Long, Long> entry : idToQty.entrySet()) {
-            Long materialId = entry.getKey();
-            Long quantity = entry.getValue();
-            Material material = matMap.get(materialId);
+        // 4️⃣ BOM 생성
+        Bom bom = Bom.builder()
+                .part(part)
+                .materials(new ArrayList<>())
+                .status(
+                        requestDTO.getBomStatus() != null
+                                ? requestDTO.getBomStatus()
+                                : BomStatus.PENDING_APPROVAL
+                )
+                .complexity(BomComplexity.SIMPLE)
+                .build();
 
-            BomMaterial existing = existingMaterials.get(materialId);
-            if (existing != null) {
-                existing.updateQuantity(quantity);
-                newMaterialList.add(existing);
-            } else {
-                BomMaterial newMat = BomMaterial.builder()
-                        .bom(bom)
-                        .material(material)
-                        .quantity(quantity)
-                        .build();
-                newMaterialList.add(newMat);
-            }
+        // 5️⃣ 자재 매핑
+        for (Material material : materials) {
+            Long quantity = idToQty.get(material.getId());
+            BomMaterial bm = BomMaterial.builder()
+                    .bom(bom)
+                    .material(material)
+                    .quantity(quantity)
+                    .build();
+            bom.addMaterial(bm);
         }
 
-        // 요청에서 빠진 자재 제거
-        bom.getMaterials().clear();
-        bom.getMaterials().addAll(newMaterialList);
-
-        // 복잡도 자동 계산
+        // 6️⃣ 계산 로직
         bom.calculateComplexity();
+        bom.calculateTotalCost();
 
         // 수정일 갱신 후 저장
         bom.touchNow();
 
-        boolean isNew = bom.getId() == null;
         Bom saved =  bomRepository.saveAndFlush(bom);
+        saved.generateBomCode(saved.getId());
+        bomRepository.save(saved);
 
-        publishBomEvent(saved, isNew ? "BomCreated" : "BomUpdated");
+        // 코드 생성 (id 기반)
+        if (saved.getBomCode() == null) {
+            saved.generateBomCode(saved.getId());
+            bomRepository.save(saved); // 다시 저장해서 DB 반영
+        }
+
+        // 부품 원가 갱신
+//        part.updateStandardCost(bom.getTotalCost());
+//        partRepository.save(part);
+
+        // 8️⃣ 이벤트 발행
+        publishBomEvent(saved, "BomCreated");
 
         return BomResponseDTO.from(saved);
     }
@@ -171,10 +195,15 @@ public class BomService {
 
         // 복잡도 재계산
         bom.calculateComplexity();
+        bom.calculateTotalCost();
 
         bom.touchNow();
 
         Bom saved = bomRepository.saveAndFlush(bom);
+
+//        Part part = bom.getPart();
+//        part.updateStandardCost(bom.getTotalCost());
+//        partRepository.save(part);
 
         publishBomEvent(saved, "BomUpdated");
 

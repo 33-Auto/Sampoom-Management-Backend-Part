@@ -72,6 +72,21 @@ public class MaterialController {
         return ApiResponse.success_only(SuccessStatus.OK);
     }
 
+    @Operation(summary = "원자재 검색", description = "원자재명 또는 코드로 검색합니다.")
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<PageResponseDTO<MaterialResponseDTO>>> searchMaterials(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return ApiResponse.success(
+                SuccessStatus.OK,
+                materialService.searchMaterials(keyword, categoryId, page, size)
+        );
+    }
+
+
 //    @Operation(summary = "자재 검색", description = "자재 이름 또는 코드로 검색합니다.")
 //    @GetMapping("/search")
 //    public ResponseEntity<ApiResponse<PageResponseDTO<MaterialResponseDTO>>> searchMaterials(

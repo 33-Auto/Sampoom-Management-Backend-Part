@@ -1,5 +1,6 @@
 package com.sampoom.backend.api.bom.dto;
 
+import com.sampoom.backend.api.bom.entity.BomStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,6 +14,7 @@ import java.util.List;
 @Builder
 public class BomRequestDTO {
     private Long partId;
+    private BomStatus bomStatus;
     private List<BomMaterialDTO> materials;  // 자재 목록
 
     @Getter

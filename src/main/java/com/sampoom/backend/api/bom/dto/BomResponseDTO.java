@@ -2,6 +2,9 @@ package com.sampoom.backend.api.bom.dto;
 
 import com.sampoom.backend.api.bom.entity.Bom;
 import com.sampoom.backend.api.bom.entity.BomMaterial;
+import com.sampoom.backend.api.part.entity.Part;
+import com.sampoom.backend.api.part.entity.PartCategory;
+import com.sampoom.backend.api.part.entity.PartGroup;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,33 +22,62 @@ import java.util.stream.Collectors;
 public class BomResponseDTO {
     private Long id;
     private String bomCode;
+
+    private Long partId;
     private String partName;
     private String partCode;
-    private Long partId;
+
+    private Long categoryId;
+    private String categoryName;
+
+    private Long groupId;
+    private String groupName;
+
     private String version;
     private String status;
     private String complexity;
-    private int componentCount;
-    private Long totalCost;
+
+
+    private int componentCount;  // 원자재 종류 수
+    private Long totalQuantity;  // 총 수량
+    private Long totalCost;  // 총 금액
     private List<BomMaterialResponse> materials;  // 자재 구성 목록
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     public static BomResponseDTO from(Bom bom) {
+        Part part = bom.getPart();
+        PartGroup group = part.getPartGroup();
+        PartCategory category = (group != null) ? group.getCategory() : null;
+
+        List<BomMaterialResponse> materials = bom.getMaterials().stream()
+                .sorted(Comparator.comparing(bm -> bm.getMaterial().getName()))
+                .map(BomMaterialResponse::from)
+                .collect(Collectors.toList());
+
+        // 실시간 계산
+        int componentCount = materials.size();
+        long totalQuantity = materials.stream()
+                .mapToLong(BomMaterialResponse::getQuantity)
+                .sum();
+
         return BomResponseDTO.builder()
                 .id(bom.getId())
+                .bomCode(bom.getBomCode())
                 .partId(bom.getPart().getId())
                 .partName(bom.getPart().getName())
                 .partCode(bom.getPart().getCode())
                 .version("v" + bom.getVersion())
+                .categoryId(category != null ? category.getId() : null)
+                .categoryName(category != null ? category.getName() : null)
+                .groupId(group != null ? group.getId() : null)
+                .groupName(group != null ? group.getName() : null)
                 .status(bom.getStatus().name())
                 .complexity(bom.getComplexity().name())
-                .componentCount(bom.getMaterials().size())
+                .componentCount(componentCount)
+                .totalQuantity(totalQuantity)
                 .totalCost(bom.getTotalCost())
-                .materials(bom.getMaterials().stream()
-                        .sorted(Comparator.comparing(bm -> bm.getMaterial().getName())) // 이름순 정렬 (선택사항)
-                        .map(BomMaterialResponse::from)
-                        .collect(Collectors.toList()))
+                .materials(materials)
                 .createdAt(bom.getCreatedAt())
                 .updatedAt(bom.getUpdatedAt())
                 .build();
