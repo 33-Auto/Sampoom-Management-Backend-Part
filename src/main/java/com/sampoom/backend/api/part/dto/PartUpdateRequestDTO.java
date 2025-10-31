@@ -1,9 +1,12 @@
 package com.sampoom.backend.api.part.dto;
 
 import com.sampoom.backend.api.part.entity.PartStatus;
+import com.sampoom.backend.api.part.entity.ProcurementType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.math.BigDecimal;
 
 @Getter
 @Setter
@@ -16,4 +19,7 @@ public class PartUpdateRequestDTO {
     private Integer baseQuantity;
     private Integer leadTime;
     private Long groupId;
+
+    private ProcurementType procurementType;
+    private BigDecimal standardCost;
 }

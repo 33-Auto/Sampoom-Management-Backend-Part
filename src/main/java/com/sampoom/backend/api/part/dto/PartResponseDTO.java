@@ -3,6 +3,8 @@ package com.sampoom.backend.api.part.dto;
 import com.sampoom.backend.api.part.entity.Part;
 import lombok.Getter;
 
+import java.math.BigDecimal;
+
 @Getter
 public class PartResponseDTO {
 
@@ -13,6 +15,9 @@ public class PartResponseDTO {
     private String partUnit;
     private Integer baseQuantity;
     private Integer leadTime;
+
+    private BigDecimal standardCost;
+    private String procurementType;
 
     private Long groupId;
     private String groupName;
@@ -25,6 +30,10 @@ public class PartResponseDTO {
         this.partUnit = part.getPartUnit();
         this.baseQuantity = part.getBaseQuantity();
         this.leadTime = part.getLeadTime();
+
+        this.standardCost = part.getStandardCost();
+        this.procurementType = part.getProcurementType().name();
+
 
         if (part.getPartGroup() != null) {
             this.groupId = part.getPartGroup().getId();
