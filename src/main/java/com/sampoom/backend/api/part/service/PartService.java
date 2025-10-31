@@ -123,7 +123,6 @@ public class PartService {
                         partGroup,
                         partCreateRequestDTO.getPartUnit(),
                         partCreateRequestDTO.getBaseQuantity(),
-                        partCreateRequestDTO.getLeadTime(),
                         PartStatus.ACTIVE
                 );
 

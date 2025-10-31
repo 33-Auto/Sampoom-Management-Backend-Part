@@ -27,13 +27,13 @@ public class Part extends BaseTimeEntity {
 
     private Integer baseQuantity;  // 기준개수
 
-    private Integer leadTime;  // 리드타임
+    private Integer leadTime = 0;  // 리드타임 (공정 기준 자동으로, 기본값 0)
 
     @Enumerated(EnumType.STRING)
     private PartStatus status;  // 단종
 
     @Column(precision = 15)
-    private BigDecimal standardCost; // 표준 단가 (자동 계산)
+    private BigDecimal standardCost; // 표준 단가 (자동 계산, 입력 X)
 
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -44,16 +44,15 @@ public class Part extends BaseTimeEntity {
     @Column(nullable = false)
     private Long version; // 버전 필드 추가
 
-    // CSV 로더가 사용할 생성자
-    public Part(String code, String name, PartGroup partGroup, String partUnit, Integer baseQuantity, Integer leadTime, PartStatus status) {
+    public Part(String code, String name, PartGroup partGroup, String partUnit, Integer baseQuantity, PartStatus status) {
         this.code = code;
         this.name = name;
         this.partGroup = partGroup;
         this.partUnit = partUnit;
         this.baseQuantity = baseQuantity;
-        this.leadTime = leadTime;
+        this.leadTime = 0;
         this.status = PartStatus.ACTIVE;
-        this.standardCost = standardCost;
+        this.standardCost = BigDecimal.ZERO;
     }
 
     // 수정 메서드
@@ -71,11 +70,6 @@ public class Part extends BaseTimeEntity {
         //  기준개수 수정
         if (partUpdateRequestDTO.getBaseQuantity() != null) {
             this.baseQuantity = partUpdateRequestDTO.getBaseQuantity();
-        }
-
-        // 리드타임 수정
-        if (partUpdateRequestDTO.getLeadTime() != null) {
-            this.leadTime = partUpdateRequestDTO.getLeadTime();
         }
     }
 

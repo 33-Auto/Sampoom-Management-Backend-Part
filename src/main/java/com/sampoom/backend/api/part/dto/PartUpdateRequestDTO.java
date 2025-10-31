@@ -16,8 +16,5 @@ public class PartUpdateRequestDTO {
     private PartStatus status;
     private String partUnit;
     private Integer baseQuantity;
-    private Integer leadTime;
     private Long groupId;
-
-    private BigDecimal standardCost;
 }

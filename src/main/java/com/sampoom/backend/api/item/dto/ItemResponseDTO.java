@@ -4,6 +4,8 @@ import com.sampoom.backend.api.material.dto.MaterialResponseDTO;
 import com.sampoom.backend.api.part.dto.PartListResponseDTO;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,6 +27,7 @@ public class ItemResponseDTO {
     private Integer leadTime;
     private Integer baseQuantity;
 
+    private BigDecimal standardCost;
 
     public static ItemResponseDTO ofMaterial(MaterialResponseDTO m) {
         return ItemResponseDTO.builder()
@@ -38,6 +41,7 @@ public class ItemResponseDTO {
                 .unit(m.getMaterialUnit())
                 .leadTime(m.getLeadTime())
                 .baseQuantity(m.getBaseQuantity())
+                .standardCost(m.getStandardCost())
                 .build();
     }
 
@@ -54,6 +58,7 @@ public class ItemResponseDTO {
                 .unit(p.getPartUnit())
                 .leadTime(p.getLeadTime())
                 .baseQuantity(p.getBaseQuantity())
+                .standardCost(p.getStandardCost())
                 .build();
     }
 }
