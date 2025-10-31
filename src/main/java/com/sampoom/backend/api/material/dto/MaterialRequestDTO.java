@@ -17,5 +17,5 @@ public class MaterialRequestDTO {
     private String materialUnit;
     private Integer baseQuantity;  // 기준단위
     private Integer leadTime;      // 리드타임
-    private BigDecimal standardCost;         // 표준단가
+    private Long standardCost;         // 표준단가
 }

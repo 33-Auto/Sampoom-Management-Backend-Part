@@ -23,7 +23,7 @@ public class PartListResponseDTO {
     private Integer baseQuantity;
     private Integer leadTime;
 
-    private BigDecimal standardCost;
+    private Long standardCost;
 
     private Long groupId;
     private String groupName;

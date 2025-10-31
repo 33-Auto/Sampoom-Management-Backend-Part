@@ -18,11 +18,15 @@ import java.util.stream.Collectors;
 @Builder
 public class BomResponseDTO {
     private Long id;
+    private String bomCode;
     private String partName;
     private String partCode;
     private Long partId;
+    private String version;
     private String status;
     private String complexity;
+    private int componentCount;
+    private Long totalCost;
     private List<BomMaterialResponse> materials;  // 자재 구성 목록
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -33,8 +37,11 @@ public class BomResponseDTO {
                 .partId(bom.getPart().getId())
                 .partName(bom.getPart().getName())
                 .partCode(bom.getPart().getCode())
+                .version("v" + bom.getVersion())
                 .status(bom.getStatus().name())
                 .complexity(bom.getComplexity().name())
+                .componentCount(bom.getMaterials().size())
+                .totalCost(bom.getTotalCost())
                 .materials(bom.getMaterials().stream()
                         .sorted(Comparator.comparing(bm -> bm.getMaterial().getName())) // 이름순 정렬 (선택사항)
                         .map(BomMaterialResponse::from)
@@ -55,14 +62,23 @@ public class BomResponseDTO {
         private String materialCode;
         private String unit;
         private Long quantity;
+        private Long standardCost;
+        private Long total;  // 단가 * 수량
 
         public static BomMaterialResponse from(BomMaterial bm) {
+            Long cost = bm.getMaterial().getStandardCost() != null
+                    ? bm.getMaterial().getStandardCost()
+                    : 0L;
+            Long total = cost * bm.getQuantity();
+
             return BomMaterialResponse.builder()
                     .materialId(bm.getMaterial().getId())
                     .materialName(bm.getMaterial().getName())
                     .materialCode(bm.getMaterial().getMaterialCode())
                     .unit(bm.getMaterial().getMaterialUnit())
                     .quantity(bm.getQuantity())
+                    .standardCost(cost)
+                    .total(total)
                     .build();
         }
     }

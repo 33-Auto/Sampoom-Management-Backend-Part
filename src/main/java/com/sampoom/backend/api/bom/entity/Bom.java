@@ -42,6 +42,13 @@ public class Bom extends BaseTimeEntity {
     @Builder.Default
     private BomComplexity complexity = BomComplexity.SIMPLE;
 
+    @Column(name = "total_cost", nullable = false)
+    @Builder.Default
+    private Long totalCost = 0L;
+
+    @Column(name = "bom_code", unique = true, nullable = false, length = 30)
+    private String bomCode;
+
     @Version
     private Long version;
 
@@ -54,6 +61,19 @@ public class Bom extends BaseTimeEntity {
 
         // 복잡도 재계산
         calculateComplexity();
+
+        // 자재 추가 시 총비용 재계산
+        calculateTotalCost();
+    }
+
+    /** 총비용 계산 */
+    public void calculateTotalCost() {
+        this.totalCost = this.materials.stream()
+                .mapToLong(m -> {
+                    if (m.getMaterial().getStandardCost() == null) return 0L;
+                    return m.getMaterial().getStandardCost() * m.getQuantity();
+                })
+                .sum();
     }
 
     // 수정일 갱신
@@ -71,5 +91,10 @@ public class Bom extends BaseTimeEntity {
     public void updateStatus(BomStatus newStatus) {
         this.status = newStatus;
         touchNow();
+    }
+
+    // 코드 생성
+    public void generateBomCode(Long id) {
+        this.bomCode = String.format("BOM-%03d", id);
     }
 }

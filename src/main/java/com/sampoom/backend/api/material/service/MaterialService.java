@@ -104,7 +104,7 @@ public class MaterialService {
                 .baseQuantity(requestDTO.getBaseQuantity())
                 .leadTime(requestDTO.getLeadTime())
                 .materialCategory(category)
-                .standardCost(Optional.ofNullable(requestDTO.getStandardCost()).orElse(BigDecimal.ZERO))
+                .standardCost(Optional.ofNullable(requestDTO.getStandardCost()).orElse(0L))
                 .build();
 
         materialRepository.save(material);

@@ -37,13 +37,13 @@ public class Material {
 
 
     @Column(precision = 15)
-    private BigDecimal standardCost; // 표준단가
+    private Long standardCost; // 표준단가
 
     @Version
     private Long version; // JPA가 자동 관리 (낙관적 락 + 자동 증가)
 
     /** 이름/단위/기준단위/리드타임 수정 */
-    public void updateBasicInfo(String name, String unit, Integer baseQuantity, Integer leadTime, BigDecimal standardCost) {
+    public void updateBasicInfo(String name, String unit, Integer baseQuantity, Integer leadTime, Long standardCost) {
         this.name = name;
         this.materialUnit = unit;
         this.baseQuantity = baseQuantity;

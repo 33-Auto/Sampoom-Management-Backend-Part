@@ -32,8 +32,7 @@ public class Part extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private PartStatus status;  // 단종
 
-    @Column(precision = 15)
-    private BigDecimal standardCost; // 표준 단가 (자동 계산, 입력 X)
+    private Long standardCost; // 표준 단가 (자동 계산, 입력 X)
 
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -52,7 +51,7 @@ public class Part extends BaseTimeEntity {
         this.baseQuantity = baseQuantity;
         this.leadTime = 0;
         this.status = PartStatus.ACTIVE;
-        this.standardCost = BigDecimal.ZERO;
+        this.standardCost = 0L;
     }
 
     // 수정 메서드

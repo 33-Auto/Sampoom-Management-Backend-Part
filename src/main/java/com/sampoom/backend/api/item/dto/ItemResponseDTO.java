@@ -27,7 +27,7 @@ public class ItemResponseDTO {
     private Integer leadTime;
     private Integer baseQuantity;
 
-    private BigDecimal standardCost;
+    private Long standardCost;
 
     public static ItemResponseDTO ofMaterial(MaterialResponseDTO m) {
         return ItemResponseDTO.builder()
