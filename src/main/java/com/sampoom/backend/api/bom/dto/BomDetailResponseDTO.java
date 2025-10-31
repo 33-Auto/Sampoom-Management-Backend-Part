@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Getter
@@ -21,6 +22,7 @@ public class BomDetailResponseDTO {
     private Long partId;
     private String status;
     private String complexity;
+    private Long totalCost;
     private List<BomMaterialDTO> materials;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -36,19 +38,33 @@ public class BomDetailResponseDTO {
         private String materialCode;
         private String unit;
         private Long quantity;
+        private Long standardCost;  // 단가
+        private Long total;  // 단가 * 수량
     }
 
     public static BomDetailResponseDTO from(Bom bom) {
         List<BomMaterialDTO> materialDtos = bom.getMaterials().stream()
-                .map(material -> BomMaterialDTO.builder()
-                        .id(material.getId())
-                        .materialId(material.getMaterial().getId())
-                        .materialName(material.getMaterial().getName())
-                        .materialCode(material.getMaterial().getMaterialCode())
-                        .unit(material.getMaterial().getMaterialUnit())
-                        .quantity(material.getQuantity())
-                        .build())
+                .map(material -> {
+                    Long cost = Optional.ofNullable(material.getMaterial().getStandardCost()).orElse(0L);
+                    Long total = cost * Optional.ofNullable(material.getQuantity()).orElse(0L);
+
+                    return BomMaterialDTO.builder()
+                            .id(material.getId())
+                            .materialId(material.getMaterial().getId())
+                            .materialName(material.getMaterial().getName())
+                            .materialCode(material.getMaterial().getMaterialCode())
+                            .unit(material.getMaterial().getMaterialUnit())
+                            .quantity(material.getQuantity())
+                            .standardCost(cost)
+                            .total(total)
+                            .build();
+                })
                 .collect(Collectors.toList());
+
+        // BOM 총비용 계산 (자재별 total 합)
+        Long totalCost = materialDtos.stream()
+                .mapToLong(BomMaterialDTO::getTotal)
+                .sum();
 
         return BomDetailResponseDTO.builder()
                 .id(bom.getId())
@@ -58,6 +74,7 @@ public class BomDetailResponseDTO {
                 .status(bom.getStatus().name())
                 .complexity(bom.getComplexity().name())
                 .materials(materialDtos)
+                .totalCost(totalCost)
                 .createdAt(bom.getCreatedAt())
                 .updatedAt(bom.getUpdatedAt())
                 .build();

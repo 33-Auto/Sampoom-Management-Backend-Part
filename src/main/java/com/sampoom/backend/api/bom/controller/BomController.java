@@ -27,7 +27,7 @@ public class BomController {
     @Operation(summary = "BOM 추가", description = "새로운 BOM을 등록합니다.")
     @PostMapping
     public ResponseEntity<ApiResponse<BomResponseDTO>> createOrUpdateBom(@Valid @RequestBody BomRequestDTO bomRequestDTO) {
-        return ApiResponse.success(SuccessStatus.CREATED, bomService.createOrUpdateBom(bomRequestDTO));
+        return ApiResponse.success(SuccessStatus.CREATED, bomService.createBom(bomRequestDTO));
     }
 
     @Operation(summary = "BOM 목록 조회", description = "페이징 처리된 BOM 목록을 조회하고, 카테고리나 그룹으로 필터링합니다.")

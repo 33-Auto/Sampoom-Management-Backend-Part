@@ -1,10 +1,7 @@
 package com.sampoom.backend.api.part.service;
 
 import com.sampoom.backend.api.part.dto.*;
-import com.sampoom.backend.api.part.entity.PartCategory;
-import com.sampoom.backend.api.part.entity.Part;
-import com.sampoom.backend.api.part.entity.PartGroup;
-import com.sampoom.backend.api.part.entity.PartStatus;
+import com.sampoom.backend.api.part.entity.*;
 import com.sampoom.backend.api.part.event.dto.PartEvent;
 import com.sampoom.backend.api.part.event.service.OutboxService;
 import com.sampoom.backend.api.part.repository.PartCategoryRepository;
@@ -120,16 +117,19 @@ public class PartService {
 
             try {
                 // 부품 생성 시도
-                Part newPart = new Part(nextCode,
+                Part newPart = new Part(
+                        nextCode,
                         partCreateRequestDTO.getName(),
                         partGroup,
                         partCreateRequestDTO.getPartUnit(),
-                        partCreateRequestDTO.getBaseQuantity(),
-                        partCreateRequestDTO.getLeadTime()
+                        partCreateRequestDTO.getBaseQuantity()
                 );
+
+                // 표준단가 자동 계산
 
                 savedPart = partRepository.saveAndFlush(newPart);
                 break;
+
             } catch (DataIntegrityViolationException e) {
                 // DataIntegrityViolationException 감지 (코드 중복 의심)
                 log.warn("DataIntegrityViolationException 감지 (코드 중복 가능성): {}", e.getMessage());
@@ -180,6 +180,7 @@ public class PartService {
             Part part = partRepository.findById(partId)
                     .orElseThrow(() -> new NotFoundException(ErrorStatus.PART_NOT_FOUND));
 
+            // 그룹 변경 시 코드 재생성
             if (partUpdateRequestDTO.getGroupId() != null && !partUpdateRequestDTO.getGroupId().equals(part.getPartGroup().getId())) {
                 PartGroup newGroup = partGroupRepository.findById(partUpdateRequestDTO.getGroupId())
                         .orElseThrow(() -> new NotFoundException(ErrorStatus.GROUP_NOT_FOUND));
@@ -192,6 +193,8 @@ public class PartService {
             }
 
             part.update(partUpdateRequestDTO);
+
+            // 표준단가 계산
 
             partRepository.flush();
 

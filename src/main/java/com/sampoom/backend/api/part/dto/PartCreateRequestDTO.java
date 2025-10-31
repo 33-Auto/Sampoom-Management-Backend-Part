@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -22,7 +24,4 @@ public class PartCreateRequestDTO {
 
     @NotNull(message = "기준 개수는 필수입니다.")
     private Integer baseQuantity;
-
-    @NotNull(message = "리드 타임은 필수입니다.")
-    private Integer leadTime;
 }

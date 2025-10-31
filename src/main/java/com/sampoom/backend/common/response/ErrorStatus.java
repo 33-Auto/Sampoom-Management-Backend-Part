@@ -12,6 +12,8 @@ public enum ErrorStatus {
     // 400 BAD_REQUEST
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다.", 30000),
     CATEGORY_IN_USE(HttpStatus.BAD_REQUEST, "해당 카테고리를 사용하는 그룹이 존재하여 삭제할 수 없습니다.", 30001),
+    DUPLICATE_BOM(HttpStatus.BAD_REQUEST, "이미 해당 부품의 BOM이 존재합니다. 수정으로 진행해주세요.", 30002),
+
 
     // 401 UNAUTHORIZED
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다.", 10401),
