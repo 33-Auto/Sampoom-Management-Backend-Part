@@ -1,4 +1,4 @@
-package com.sampoom.backend.api.part.event.service;
+package com.sampoom.backend.common.outbox.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sampoom.backend.api.bom.event.dto.BomEvent;
@@ -6,8 +6,8 @@ import com.sampoom.backend.api.material.event.dto.MaterialCategoryEvent;
 import com.sampoom.backend.api.part.event.dto.PartCategoryEvent;
 import com.sampoom.backend.api.part.event.dto.PartEvent;
 import com.sampoom.backend.api.part.event.dto.PartGroupEvent;
-import com.sampoom.backend.api.part.event.entity.Outbox;
-import com.sampoom.backend.api.part.event.repository.OutboxRepository;
+import com.sampoom.backend.common.outbox.entity.Outbox;
+import com.sampoom.backend.common.outbox.repository.OutboxRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;

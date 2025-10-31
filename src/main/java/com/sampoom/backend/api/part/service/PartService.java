@@ -3,7 +3,7 @@ package com.sampoom.backend.api.part.service;
 import com.sampoom.backend.api.part.dto.*;
 import com.sampoom.backend.api.part.entity.*;
 import com.sampoom.backend.api.part.event.dto.PartEvent;
-import com.sampoom.backend.api.part.event.service.OutboxService;
+import com.sampoom.backend.common.outbox.service.OutboxService;
 import com.sampoom.backend.api.part.repository.PartCategoryRepository;
 import com.sampoom.backend.api.part.repository.PartGroupRepository;
 import com.sampoom.backend.api.part.repository.PartRepository;

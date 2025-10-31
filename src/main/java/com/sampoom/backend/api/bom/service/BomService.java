@@ -12,7 +12,7 @@ import com.sampoom.backend.api.bom.repository.BomRepository;
 import com.sampoom.backend.api.material.entity.Material;
 import com.sampoom.backend.api.material.repository.MaterialRepository;
 import com.sampoom.backend.api.part.entity.Part;
-import com.sampoom.backend.api.part.event.service.OutboxService;
+import com.sampoom.backend.common.outbox.service.OutboxService;
 import com.sampoom.backend.api.part.repository.PartRepository;
 import com.sampoom.backend.common.dto.PageResponseDTO;
 import com.sampoom.backend.common.exception.BadRequestException;

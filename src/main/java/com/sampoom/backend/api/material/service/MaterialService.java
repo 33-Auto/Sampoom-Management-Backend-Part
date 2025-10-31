@@ -8,7 +8,7 @@ import com.sampoom.backend.api.material.entity.MaterialCategory;
 import com.sampoom.backend.api.material.event.dto.MaterialEvent;
 import com.sampoom.backend.api.material.repository.MaterialCategoryRepository;
 import com.sampoom.backend.api.material.repository.MaterialRepository;
-import com.sampoom.backend.api.part.event.service.OutboxService;
+import com.sampoom.backend.common.outbox.service.OutboxService;
 import com.sampoom.backend.common.dto.PageResponseDTO;
 import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
@@ -19,7 +19,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;

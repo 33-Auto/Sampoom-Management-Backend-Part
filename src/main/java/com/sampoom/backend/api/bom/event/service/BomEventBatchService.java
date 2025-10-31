@@ -3,9 +3,9 @@
 //import com.fasterxml.jackson.databind.ObjectMapper;
 //import com.sampoom.backend.api.bom.entity.Bom;
 //import com.sampoom.backend.api.bom.event.dto.BomEvent;
-//import com.sampoom.backend.api.part.event.entity.Outbox;
-//import com.sampoom.backend.api.part.event.repository.OutboxRepository;
-//import com.sampoom.backend.common.entity.OutboxStatus;
+//import com.sampoom.backend.common.outbox.entity.Outbox;
+//import com.sampoom.backend.common.outbox.repository.OutboxRepository;
+//import com.sampoom.backend.common.outbox.entity.OutboxStatus;
 //import lombok.RequiredArgsConstructor;
 //import org.springframework.stereotype.Service;
 //import org.springframework.transaction.annotation.Transactional;
