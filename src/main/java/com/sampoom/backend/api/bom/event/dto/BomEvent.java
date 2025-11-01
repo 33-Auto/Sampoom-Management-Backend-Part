@@ -22,12 +22,17 @@ public class BomEvent {
     @Builder
     public static class Payload {
         private Long bomId;
+
         private Long partId;
         private String partCode;
         private String partName;
+
         private String status;
         private String complexity;
         private boolean deleted;
+
+        private Double totalCost;
+
         private List<MaterialInfo> materials;
 
         @Getter
