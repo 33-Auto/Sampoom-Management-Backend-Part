@@ -1,6 +1,7 @@
 package com.sampoom.backend.api.process.entity;
 
 import com.sampoom.backend.api.part.entity.Part;
+import com.sampoom.backend.api.workcenter.entity.WorkCenter;
 import com.sampoom.backend.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -59,6 +60,11 @@ public class Process extends BaseTimeEntity {
     @Builder.Default
     private Integer totalStepMinutes = 0; // 모든 스텝의 총 시간 합계
 
+    // 총 공정비용 컬럼 추가
+    @Column(nullable = false)
+    @Builder.Default
+    private Long totalProcessCost = 0L; // 총 공정비용 (원)
+
     @OneToMany(mappedBy = "process", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("stepOrder ASC")
     @Builder.Default
@@ -96,6 +102,48 @@ public class Process extends BaseTimeEntity {
                 .sum();
 
         this.totalStepMinutes = this.totalSetupMinutes + this.totalProcessMinutes + this.totalWaitMinutes;
+
+        // 시간이 업데이트되면 공정비용도 함께 계산
+        updateTotalProcessCost();
+    }
+
+    // 총 공정비용을 계산하는 메서드
+    private void updateTotalProcessCost() {
+        this.totalProcessCost = 0L;
+
+        for (ProcessStep step : steps) {
+            if (step.getWorkCenter() != null) {
+                WorkCenter workCenter = step.getWorkCenter();
+                Integer hourlyRate = workCenter.getCostPerHour();
+                Integer dailyOperatingHours = workCenter.getDailyOperatingHours();
+                Integer efficiency = workCenter.getEfficiency();
+
+                if (hourlyRate == null || dailyOperatingHours == null || dailyOperatingHours <= 0
+                                                || efficiency == null || efficiency <= 0) {
+                                        continue;
+                                    }
+
+                // 각 스텝의 총 시간(분)을 계산
+                int stepTotalMinutes = (step.getSetupMinutes() != null ? step.getSetupMinutes() : 0) +
+                                     (step.getProcessMinutes() != null ? step.getProcessMinutes() : 0) +
+                                     (step.getWaitMinutes() != null ? step.getWaitMinutes() : 0);
+
+                // dailyOperatingHours를 활용한 실제 가동률 반영
+                // 실제 시간당 비용 = 기본 시간당 비용 × (24시간 ÷ 일일 운영시간) × (100 ÷ 효율성)
+                double operatingFactor = 24.0 / dailyOperatingHours; // 가동률 반영
+                double efficiencyFactor = 100.0 / efficiency; // 효율성 반영
+                double adjustedHourlyRate = hourlyRate.doubleValue() * operatingFactor * efficiencyFactor;
+
+                // 분을 시간으로 변환하고 조정된 시간당 비용을 곱해서 스텝 비용 계산
+                long stepCost = Math.round((stepTotalMinutes / 60.0) * adjustedHourlyRate);
+                this.totalProcessCost += stepCost;
+            }
+        }
+    }
+
+    // 공정비용 수동 재계산 메서드 (외부에서 호출 가능)
+    public void recalculateProcessCost() {
+        updateTotalProcessCost();
     }
 
     public void changeCode(String code) { this.code = code; }
