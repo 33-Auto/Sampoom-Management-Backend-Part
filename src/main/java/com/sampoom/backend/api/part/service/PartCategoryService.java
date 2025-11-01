@@ -4,7 +4,7 @@ import com.sampoom.backend.api.part.dto.PartCategoryCreateRequestDTO;
 import com.sampoom.backend.api.part.dto.PartCategoryUpdateRequestDTO;
 import com.sampoom.backend.api.part.entity.PartCategory;
 import com.sampoom.backend.api.part.event.dto.PartCategoryEvent;
-import com.sampoom.backend.api.part.event.service.OutboxService;
+import com.sampoom.backend.common.outbox.service.OutboxService;
 import com.sampoom.backend.api.part.repository.PartCategoryRepository;
 import com.sampoom.backend.api.part.repository.PartGroupRepository;
 import com.sampoom.backend.common.exception.BadRequestException;

@@ -7,9 +7,9 @@ import com.sampoom.backend.api.material.event.dto.MaterialEvent;
 import com.sampoom.backend.api.material.event.dto.MaterialCategoryEvent;
 import com.sampoom.backend.api.material.repository.MaterialCategoryRepository;
 import com.sampoom.backend.api.material.repository.MaterialRepository;
-import com.sampoom.backend.api.part.event.entity.Outbox;
-import com.sampoom.backend.api.part.event.repository.OutboxRepository;
-import com.sampoom.backend.common.entity.OutboxStatus;
+import com.sampoom.backend.common.outbox.entity.Outbox;
+import com.sampoom.backend.common.outbox.repository.OutboxRepository;
+import com.sampoom.backend.common.outbox.entity.OutboxStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +37,7 @@ public class MaterialEventBatchService {
                         .materialUnit(material.getMaterialUnit())
                         .baseQuantity(material.getBaseQuantity())
                         .leadTime(material.getLeadTime())
+                        .standardCost(material.getStandardCost())
                         .deleted(false)
                         .materialCategoryId(material.getMaterialCategory().getId())
 
@@ -63,6 +64,7 @@ public class MaterialEventBatchService {
 
     public void publishAllMaterialCategoryEvents() {
         List<MaterialCategory> categories = materialCategoryRepository.findAll();
+
         for (MaterialCategory category : categories) {
             try {
                 MaterialCategoryEvent.Payload payload = MaterialCategoryEvent.Payload.builder()

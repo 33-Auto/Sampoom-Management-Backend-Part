@@ -3,7 +3,7 @@ package com.sampoom.backend.api.part.service;
 import com.sampoom.backend.api.part.dto.*;
 import com.sampoom.backend.api.part.entity.*;
 import com.sampoom.backend.api.part.event.dto.PartEvent;
-import com.sampoom.backend.api.part.event.service.OutboxService;
+import com.sampoom.backend.common.outbox.service.OutboxService;
 import com.sampoom.backend.api.part.repository.PartCategoryRepository;
 import com.sampoom.backend.api.part.repository.PartGroupRepository;
 import com.sampoom.backend.api.part.repository.PartRepository;
@@ -157,6 +157,7 @@ public class PartService {
                 .deleted(false)
                 .groupId(partGroup.getId())
                 .categoryId(partGroup.getCategory().getId())
+                .standardCost(savedPart.getStandardCost())
                 .build();
 
         // OutboxService 호출
@@ -209,6 +210,7 @@ public class PartService {
                     .deleted(false)
                     .groupId(part.getPartGroup().getId())
                     .categoryId(part.getPartGroup().getCategory().getId())
+                    .standardCost(part.getStandardCost())
                     .build();
 
             // OutboxService 호출
@@ -252,6 +254,7 @@ public class PartService {
                 .deleted(true)
                 .groupId(part.getPartGroup().getId())
                 .categoryId(part.getPartGroup().getCategory().getId())
+                .standardCost(part.getStandardCost())
                 .build();
 
         // OutboxService 호출
@@ -370,7 +373,8 @@ public class PartService {
     }
 
     // 이벤트 발행 헬퍼 메서드
-    private void publishPartUpdatedEvent(Part part) {
+    @Transactional(readOnly = true)
+    public void publishPartUpdatedEvent(Part part) {
         PartEvent.Payload payload = PartEvent.Payload.builder()
                 .partId(part.getId())
                 .code(part.getCode())
@@ -382,6 +386,7 @@ public class PartService {
                 .deleted(part.getStatus() == PartStatus.DISCONTINUED)
                 .groupId(part.getPartGroup().getId())
                 .categoryId(part.getPartGroup().getCategory().getId())
+                .standardCost(part.getStandardCost())
                 .build();
 
         outboxService.saveEvent(

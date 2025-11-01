@@ -5,7 +5,7 @@ import com.sampoom.backend.api.part.dto.PartGroupUpdateRequestDTO;
 import com.sampoom.backend.api.part.entity.PartCategory;
 import com.sampoom.backend.api.part.entity.PartGroup;
 import com.sampoom.backend.api.part.event.dto.PartGroupEvent;
-import com.sampoom.backend.api.part.event.service.OutboxService;
+import com.sampoom.backend.common.outbox.service.OutboxService;
 import com.sampoom.backend.api.part.repository.PartCategoryRepository;
 import com.sampoom.backend.api.part.repository.PartGroupRepository;
 import com.sampoom.backend.common.exception.NotFoundException;

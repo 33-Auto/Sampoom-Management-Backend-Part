@@ -1,8 +1,8 @@
-package com.sampoom.backend.api.part.event.service;
+package com.sampoom.backend.common.outbox.service;
 
-import com.sampoom.backend.api.part.event.entity.Outbox;
-import com.sampoom.backend.api.part.event.repository.OutboxRepository;
-import com.sampoom.backend.common.entity.OutboxStatus;
+import com.sampoom.backend.common.outbox.entity.Outbox;
+import com.sampoom.backend.common.outbox.repository.OutboxRepository;
+import com.sampoom.backend.common.outbox.entity.OutboxStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;

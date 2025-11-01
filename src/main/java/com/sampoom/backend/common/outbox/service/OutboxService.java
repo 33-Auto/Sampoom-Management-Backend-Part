@@ -1,10 +1,10 @@
-package com.sampoom.backend.api.part.event.service;
+package com.sampoom.backend.common.outbox.service;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sampoom.backend.api.part.event.entity.Outbox;
-import com.sampoom.backend.api.part.event.repository.OutboxRepository;
-import com.sampoom.backend.common.entity.OutboxStatus;
+import com.sampoom.backend.common.outbox.entity.Outbox;
+import com.sampoom.backend.common.outbox.repository.OutboxRepository;
+import com.sampoom.backend.common.outbox.entity.OutboxStatus;
 import com.sampoom.backend.common.exception.BadRequestException;
 import com.sampoom.backend.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
