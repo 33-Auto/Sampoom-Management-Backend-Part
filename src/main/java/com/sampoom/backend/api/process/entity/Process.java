@@ -114,9 +114,14 @@ public class Process extends BaseTimeEntity {
         for (ProcessStep step : steps) {
             if (step.getWorkCenter() != null) {
                 WorkCenter workCenter = step.getWorkCenter();
-                long hourlyRate = workCenter.getCostPerHour();
-                int dailyOperatingHours = workCenter.getDailyOperatingHours();
-                int efficiency = workCenter.getEfficiency();
+                Integer hourlyRate = workCenter.getCostPerHour();
+                Integer dailyOperatingHours = workCenter.getDailyOperatingHours();
+                Integer efficiency = workCenter.getEfficiency();
+
+                if (hourlyRate == null || dailyOperatingHours == null || dailyOperatingHours <= 0
+                                                || efficiency == null || efficiency <= 0) {
+                                        continue;
+                                    }
 
                 // 각 스텝의 총 시간(분)을 계산
                 int stepTotalMinutes = (step.getSetupMinutes() != null ? step.getSetupMinutes() : 0) +
@@ -127,7 +132,7 @@ public class Process extends BaseTimeEntity {
                 // 실제 시간당 비용 = 기본 시간당 비용 × (24시간 ÷ 일일 운영시간) × (100 ÷ 효율성)
                 double operatingFactor = 24.0 / dailyOperatingHours; // 가동률 반영
                 double efficiencyFactor = 100.0 / efficiency; // 효율성 반영
-                double adjustedHourlyRate = hourlyRate * operatingFactor * efficiencyFactor;
+                double adjustedHourlyRate = hourlyRate.doubleValue() * operatingFactor * efficiencyFactor;
 
                 // 분을 시간으로 변환하고 조정된 시간당 비용을 곱해서 스텝 비용 계산
                 long stepCost = Math.round((stepTotalMinutes / 60.0) * adjustedHourlyRate);
