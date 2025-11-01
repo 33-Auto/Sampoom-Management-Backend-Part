@@ -22,6 +22,7 @@ public class ProcessResponseDTO {
     private final Integer totalProcessMinutes; // 모든 스텝의 가공시간 합계
     private final Integer totalWaitMinutes; // 모든 스텝의 대기시간 합계
     private final Integer totalStepMinutes; // 모든 스텝의 총 시간 합계
+    private final Long totalProcessCost; // 총 공정비용 (원)
     private final List<ProcessStepResponseDTO> steps;
 
     public ProcessResponseDTO(Process p) {
@@ -38,6 +39,7 @@ public class ProcessResponseDTO {
         this.totalProcessMinutes = p.getTotalProcessMinutes();
         this.totalWaitMinutes = p.getTotalWaitMinutes();
         this.totalStepMinutes = p.getTotalStepMinutes();
+        this.totalProcessCost = p.getTotalProcessCost();
         this.steps = p.getSteps().stream().map(ProcessStepResponseDTO::new).collect(Collectors.toList());
     }
 }
