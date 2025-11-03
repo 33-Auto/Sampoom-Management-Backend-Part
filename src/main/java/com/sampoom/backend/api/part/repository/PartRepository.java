@@ -49,4 +49,7 @@ where p.status = :status
             "LEFT JOIN FETCH p.partGroup g " +
             "LEFT JOIN FETCH g.category c")
     List<Part> findAllWithGroupAndCategory();
+
+    // 상태별 Part 조회 (일괄 업데이트용)
+    List<Part> findByStatus(PartStatus status);
 }
