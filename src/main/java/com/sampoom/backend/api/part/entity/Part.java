@@ -88,4 +88,14 @@ public class Part extends BaseTimeEntity {
     public void changeCode(String newCode) {
         this.code = newCode;
     }
+
+    // Part의 총 비용을 BOM 비용과 Process 비용을 합쳐서 계산하는 메서드
+    public void calculateStandardCost(Long bomCost, Long processCost) {
+        this.standardCost = (bomCost != null ? bomCost : 0L) + (processCost != null ? processCost : 0L);
+    }
+
+    // standardCost 직접 설정 메서드 (필요시)
+    public void setStandardCost(Long standardCost) {
+        this.standardCost = standardCost;
+    }
 }

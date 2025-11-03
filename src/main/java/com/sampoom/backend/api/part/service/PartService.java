@@ -9,6 +9,8 @@ import com.sampoom.backend.api.part.repository.PartGroupRepository;
 import com.sampoom.backend.api.part.repository.PartRepository;
 import com.sampoom.backend.api.process.entity.Process;
 import com.sampoom.backend.api.process.repository.ProcessRepository;
+import com.sampoom.backend.api.bom.entity.Bom;
+import com.sampoom.backend.api.bom.repository.BomRepository;
 import com.sampoom.backend.common.dto.PageResponseDTO;
 import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
@@ -37,6 +39,7 @@ public class PartService {
     private final PartCategoryRepository categoryRepository;
     private final OutboxService outboxService;
     private final ProcessRepository processRepository;
+    private final BomRepository bomRepository;
 
     // 카테고리 목록 조회
     @Transactional
@@ -396,5 +399,45 @@ public class PartService {
                 part.getVersion(),
                 payload
         );
+    }
+
+    // Part의 표준 비용을 BOM 비용과 Process 비용을 합쳐서 자동 계산하는 메서드
+    @Transactional
+    public void updateStandardCostFromBomAndProcess(Long partId) {
+        Part part = partRepository.findById(partId)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.PART_NOT_FOUND));
+
+        // BOM 비용 조회
+        Long bomCost = getBomCostByPartId(partId);
+
+        // Process 비용 조회
+        Long processCost = getProcessCostByPartId(partId);
+
+        // 기존 표준 비용과 비교해서 변경이 있을 경우에만 업데이트
+        Long newStandardCost = (bomCost != null ? bomCost : 0L) + (processCost != null ? processCost : 0L);
+
+        if (part.getStandardCost() == null || !part.getStandardCost().equals(newStandardCost)) {
+            part.calculateStandardCost(bomCost, processCost);
+
+            // DB에 변경사항 반영
+            partRepository.flush();
+
+            // Kafka 이벤트 발행
+            publishPartUpdatedEvent(part);
+        }
+    }
+
+    // BOM 비용 조회 헬퍼 메서드
+    @Transactional(readOnly = true)
+    public Long getBomCostByPartId(Long partId) {
+        Bom bom = bomRepository.findByPart_Id(partId).orElse(null);
+        return bom != null ? bom.getTotalCost() : 0L;
+    }
+
+    // Process 비용 조회 헬퍼 메서드
+    @Transactional(readOnly = true)
+    public Long getProcessCostByPartId(Long partId) {
+        Process process = processRepository.findByPartId(partId).orElse(null);
+        return process != null ? process.getTotalProcessCost() : 0L;
     }
 }

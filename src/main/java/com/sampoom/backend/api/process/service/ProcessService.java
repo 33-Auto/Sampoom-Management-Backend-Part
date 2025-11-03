@@ -91,6 +91,9 @@ public class ProcessService {
         // Part 리드타임 업데이트
         partService.updateLeadTimeFromProcess(saved.getPart().getId());
 
+        // Part 표준 비용 업데이트 (BOM 비용 + Process 비용)
+        partService.updateStandardCostFromBomAndProcess(saved.getPart().getId());
+
         return new ProcessResponseDTO(saved);
     }
 
@@ -168,6 +171,12 @@ public class ProcessService {
         // 새 Part의 리드타임 업데이트
         partService.updateLeadTimeFromProcess(part.getId());
 
+        // 기존 Part와 새 Part 모두 표준 비용 업데이트
+        if (!originalPartId.equals(part.getId())) {
+            partService.updateStandardCostFromBomAndProcess(originalPartId); // 기존 Part
+        }
+        partService.updateStandardCostFromBomAndProcess(part.getId()); // 새 Part
+
         // 변경감지로 자동 반영
         return new ProcessResponseDTO(process);
     }
@@ -181,5 +190,8 @@ public class ProcessService {
         processRepository.delete(process);
 
         partService.updateLeadTimeFromProcess(partId);
+
+        // Part 표준 비용 업데이트 (Process 삭제로 인한 비용 재계산)
+        partService.updateStandardCostFromBomAndProcess(partId);
     }
 }

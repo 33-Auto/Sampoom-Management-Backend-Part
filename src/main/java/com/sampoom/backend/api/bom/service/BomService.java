@@ -14,6 +14,7 @@ import com.sampoom.backend.api.material.repository.MaterialRepository;
 import com.sampoom.backend.api.part.entity.Part;
 import com.sampoom.backend.common.outbox.service.OutboxService;
 import com.sampoom.backend.api.part.repository.PartRepository;
+import com.sampoom.backend.api.part.service.PartService;
 import com.sampoom.backend.common.dto.PageResponseDTO;
 import com.sampoom.backend.common.exception.BadRequestException;
 import com.sampoom.backend.common.exception.NotFoundException;
@@ -37,6 +38,7 @@ public class BomService {
     private final PartRepository partRepository;
     private final MaterialRepository materialRepository;
     private final OutboxService outboxService;
+    private final PartService partService;
 
 
     // BOM 생성
@@ -136,6 +138,9 @@ public class BomService {
         // 8️⃣ 이벤트 발행
         publishBomEvent(saved, "BomCreated");
 
+        // Part 표준 비용 업데이트 (BOM 비용 + Process 비용)
+        partService.updateStandardCostFromBomAndProcess(saved.getPart().getId());
+
         return BomResponseDTO.from(saved);
     }
 
@@ -207,6 +212,9 @@ public class BomService {
 
         publishBomEvent(saved, "BomUpdated");
 
+        // Part 표준 비용 업데이트 (BOM 비용 + Process 비용)
+        partService.updateStandardCostFromBomAndProcess(saved.getPart().getId());
+
         return BomResponseDTO.from(saved);
     }
 
@@ -216,9 +224,14 @@ public class BomService {
         Bom bom = bomRepository.findById(bomId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.BOM_NOT_FOUND));
 
+        Long partId = bom.getPart().getId(); // Part ID 백업
+
         bomRepository.delete(bom);
 
         publishBomDeletedEvent(bom);
+
+        // Part 표준 비용 업데이트 (BOM 삭제로 인한 비용 재계산)
+        partService.updateStandardCostFromBomAndProcess(partId);
     }
 
 
