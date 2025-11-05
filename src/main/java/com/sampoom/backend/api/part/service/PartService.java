@@ -357,10 +357,17 @@ public class PartService {
         Process process = processRepository.findByPartId(partId)
                 .orElse(null);
 
-        // Lead Time 계산
-        Integer newLeadTime = 0;
+        // Lead Time 계산 (일 단위 + 배송시간 2일)
+        Integer newLeadTime = 2; // 기본 배송시간 2일
         if (process != null) {
-            newLeadTime = process.getTotalStepMinutes();
+            int totalMinutes = process.getTotalStepMinutes();
+            // 분을 일로 변환 (1일 = 24시간 = 1440분)
+            // 올림 처리하여 최소 1일은 보장
+            int processLeadTimeDays = (int) Math.ceil(totalMinutes / 1440.0);
+            newLeadTime = processLeadTimeDays + 2; // 공정시간(일) + 배송시간 2일
+
+            log.debug("Part [{}] leadTime 계산: 공정시간={}분({}일) + 배송시간=2일 = 총 {}일",
+                     part.getCode(), totalMinutes, processLeadTimeDays, newLeadTime);
         }
 
         // Part 엔티티 업데이트 및 이벤트 발행 (변경이 있을 경우에만)
