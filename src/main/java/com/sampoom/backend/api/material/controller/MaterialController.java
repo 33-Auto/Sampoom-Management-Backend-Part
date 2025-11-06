@@ -18,7 +18,7 @@ import java.util.List;
 
 @Tag(name = "Material", description = "Material 관련 API 입니다.")
 @RestController
-@RequestMapping("/api/materials")
+@RequestMapping("/materials")
 @RequiredArgsConstructor
 public class MaterialController {
 

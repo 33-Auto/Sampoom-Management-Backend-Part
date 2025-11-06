@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "ItemSearch", description = "부품/자재 통합 검색 API")
 @RestController
-@RequestMapping("/api/items")
+@RequestMapping("/items")
 @RequiredArgsConstructor
 public class ItemSearchController {
 
@@ -34,7 +34,7 @@ public class ItemSearchController {
             @RequestParam(required = false) Long materialCategoryId,
             @RequestParam(defaultValue = "") String keyword,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
+            @RequestParam(defaultValue = "10") int size
     ) {
         PageResponseDTO<ItemResponseDTO> result =
                 itemService.searchItems(type, partCategoryId, partGroupId, materialCategoryId, keyword, page, size);
