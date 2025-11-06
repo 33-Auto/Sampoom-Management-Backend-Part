@@ -98,14 +98,14 @@ public class ProcessService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponseDto<ProcessResponseDTO> search(String q, ProcessStatus status, int page, int size) {
+    public PageResponseDto<ProcessResponseDTO> search(String q, ProcessStatus status, Long categoryId, Long groupId, int page, int size) {
         int safePage = Math.max(page, 0);
         int safeSize = Math.min(Math.max(size, 1), 100);
 
         Pageable pageable = PageRequest.of(safePage, safeSize, Sort.by(Sort.Direction.DESC, "id"));
 
         String keyword = (q == null || q.isBlank()) ? null : q.trim();
-        Page<Process> result = processRepository.search(keyword, status, pageable);
+        Page<Process> result = processRepository.search(keyword, status, categoryId, groupId, pageable);
 
         return PageResponseDto.<ProcessResponseDTO>builder()
                 .content(result.map(ProcessResponseDTO::new).toList())
