@@ -19,26 +19,38 @@ public interface ProcessRepository extends JpaRepository<Process, Long> {
 
     // 검색 메서드 추가 (공정코드, 부품명으로 검색, 상태 필터)
     @Query(
-                    value = """
-            SELECT DISTINCT p FROM Process p
-            JOIN FETCH p.part part
-            WHERE (:q IS NULL OR :q = '' 
-                   OR LOWER(p.code) LIKE CONCAT('%', LOWER(:q), '%')
-                   OR LOWER(part.name) LIKE CONCAT('%', LOWER(:q), '%'))
-            AND (:status IS NULL OR p.status = :status)
+            value = """
+        SELECT DISTINCT p FROM Process p
+        JOIN FETCH p.part part
+        LEFT JOIN FETCH part.partGroup g
+        LEFT JOIN FETCH g.category c
+        WHERE (:q IS NULL OR :q = ''
+               OR LOWER(p.code) LIKE CONCAT('%', LOWER(:q), '%')
+               OR LOWER(part.code) LIKE CONCAT('%', LOWER(:q), '%')
+               OR LOWER(part.name) LIKE CONCAT('%', LOWER(:q), '%'))
+          AND (:status IS NULL OR p.status = :status)
+          AND (:categoryId IS NULL OR c.id = :categoryId)
+          AND (:groupId IS NULL OR g.id = :groupId)
         """,
-                    countQuery = """
-            SELECT COUNT(p) FROM Process p
-            JOIN p.part part
-            WHERE (:q IS NULL OR :q = '' 
-                   OR LOWER(p.code) LIKE CONCAT('%', LOWER(:q), '%')
-                   OR LOWER(part.name) LIKE CONCAT('%', LOWER(:q), '%'))
-           AND (:status IS NULL OR p.status = :status)
+            countQuery = """
+        SELECT COUNT(p) FROM Process p
+        JOIN p.part part
+        LEFT JOIN part.partGroup g
+        LEFT JOIN g.category c
+        WHERE (:q IS NULL OR :q = ''
+               OR LOWER(p.code) LIKE CONCAT('%', LOWER(:q), '%')
+               OR LOWER(part.code) LIKE CONCAT('%', LOWER(:q), '%')
+               OR LOWER(part.name) LIKE CONCAT('%', LOWER(:q), '%'))
+          AND (:status IS NULL OR p.status = :status)
+          AND (:categoryId IS NULL OR c.id = :categoryId)
+          AND (:groupId IS NULL OR g.id = :groupId)
         """
-                )
+    )
     Page<Process> search(
             @Param("q") String q,
             @Param("status") ProcessStatus status,
+            @Param("categoryId") Long categoryId,
+            @Param("groupId") Long groupId,
             Pageable pageable
     );
 

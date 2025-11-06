@@ -36,10 +36,12 @@ public class ProcessController {
     public ResponseEntity<ApiResponse<PageResponseDto<ProcessResponseDTO>>> search(
             @RequestParam(value = "query", required = false) String q,
             @RequestParam(value = "status", required = false) ProcessStatus status,
+            @RequestParam(value = "categoryId", required = false) Long categoryId,
+            @RequestParam(value = "groupId", required = false) Long groupId,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size
     ) {
-        PageResponseDto<ProcessResponseDTO> response = processService.search(q, status, page, size);
+        PageResponseDto<ProcessResponseDTO> response = processService.search(q, status, categoryId, groupId, page, size);
         return ApiResponse.success(SuccessStatus.OK, response);
     }
 

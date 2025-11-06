@@ -23,6 +23,12 @@ public class ProcessResponseDTO {
     private final Integer totalWaitMinutes; // 모든 스텝의 대기시간 합계
     private final Integer totalStepMinutes; // 모든 스텝의 총 시간 합계
     private final Long totalProcessCost; // 총 공정비용 (원)
+
+    private final Long categoryId;
+    private final String categoryName;
+    private final Long groupId;
+    private final String groupName;
+
     private final List<ProcessStepResponseDTO> steps;
 
     public ProcessResponseDTO(Process p) {
@@ -40,6 +46,18 @@ public class ProcessResponseDTO {
         this.totalWaitMinutes = p.getTotalWaitMinutes();
         this.totalStepMinutes = p.getTotalStepMinutes();
         this.totalProcessCost = p.getTotalProcessCost();
+
+        this.categoryId = (p.getPart().getPartGroup() != null && p.getPart().getPartGroup().getCategory() != null)
+                ? p.getPart().getPartGroup().getCategory().getId()
+                : null;
+
+        this.categoryName = (p.getPart().getPartGroup() != null && p.getPart().getPartGroup().getCategory() != null)
+                ? p.getPart().getPartGroup().getCategory().getName()
+                : null;
+
+        this.groupId = p.getPart().getPartGroup() != null ? p.getPart().getPartGroup().getId() : null;
+        this.groupName = p.getPart().getPartGroup() != null ? p.getPart().getPartGroup().getName() : null;
+
         this.steps = p.getSteps().stream().map(ProcessStepResponseDTO::new).collect(Collectors.toList());
     }
 }
