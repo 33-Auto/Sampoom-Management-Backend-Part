@@ -11,8 +11,6 @@ import lombok.NoArgsConstructor;
 @Table(name = "material_master")
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class Material {
 
     @Id
