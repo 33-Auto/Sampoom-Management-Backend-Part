@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 @Table(name = "material_master")
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Material {
 
     @Id
@@ -27,6 +29,7 @@ public class Material {
     private Integer baseQuantity; // 기준단위 (몇개씩 넣을지)
 
     @Column(name = "standard_quantity", nullable = false, columnDefinition = "INTEGER DEFAULT 1")
+    @Builder.Default
     private Integer standardQuantity = 1; // 기준 수량 (기본값 1)
 
     @Column(name = "lead_time")
