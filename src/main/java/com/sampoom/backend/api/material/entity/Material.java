@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "material_master")
@@ -29,6 +28,10 @@ public class Material {
     @Column(name = "base_quantity")
     private Integer baseQuantity; // 기준단위 (몇개씩 넣을지)
 
+    @Column(name = "standard_quantity", nullable = false, columnDefinition = "INTEGER DEFAULT 1")
+    @Builder.Default
+    private Integer standardQuantity = 1; // 기준 수량 (기본값 1)
+
     @Column(name = "lead_time")
     private Integer leadTime; // 리드타임
 
@@ -40,11 +43,12 @@ public class Material {
     @Version
     private Long version; // JPA가 자동 관리 (낙관적 락 + 자동 증가)
 
-    /** 이름/단위/기준단위/리드타임 수정 */
-    public void updateBasicInfo(String name, String unit, Integer baseQuantity, Integer leadTime, Long standardCost) {
+    /** 이름/단위/기준단위/리드타임/기준수량 수정 */
+    public void updateBasicInfo(String name, String unit, Integer baseQuantity, Integer standardQuantity, Integer leadTime, Long standardCost) {
         this.name = name;
         this.materialUnit = unit;
         this.baseQuantity = baseQuantity;
+        this.standardQuantity = standardQuantity != null ? standardQuantity : 1;
         this.leadTime = leadTime;
         this.standardCost = standardCost;
     }

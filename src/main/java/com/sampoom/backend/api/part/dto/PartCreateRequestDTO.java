@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 
 @Getter
 @Setter
@@ -24,4 +23,7 @@ public class PartCreateRequestDTO {
 
     @NotNull(message = "기준 개수는 필수입니다.")
     private Integer baseQuantity;
+
+    // 기준 수량 (선택적, 기본값 1)
+    private Integer standardQuantity;
 }

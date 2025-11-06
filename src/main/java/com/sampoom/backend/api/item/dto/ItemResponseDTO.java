@@ -25,6 +25,7 @@ public class ItemResponseDTO {
 
     private Integer leadTime;
     private Integer baseQuantity;
+    private Integer standardQuantity;
 
     private Long standardCost;
 
@@ -40,6 +41,7 @@ public class ItemResponseDTO {
                 .unit(m.getMaterialUnit())
                 .leadTime(m.getLeadTime())
                 .baseQuantity(m.getBaseQuantity())
+                .standardQuantity(m.getStandardQuantity())
                 .standardCost(m.getStandardCost())
                 .build();
     }
@@ -57,6 +59,7 @@ public class ItemResponseDTO {
                 .unit(p.getPartUnit())
                 .leadTime(p.getLeadTime())
                 .baseQuantity(p.getBaseQuantity())
+                .standardQuantity(p.getStandardQuantity())
                 .standardCost(p.getStandardCost())
                 .build();
     }

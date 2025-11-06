@@ -101,6 +101,7 @@ public class MaterialService {
                 .materialCode(materialCode)
                 .materialUnit(requestDTO.getMaterialUnit())
                 .baseQuantity(requestDTO.getBaseQuantity())
+                .standardQuantity(requestDTO.getStandardQuantity() != null ? requestDTO.getStandardQuantity() : 1)
                 .leadTime(requestDTO.getLeadTime())
                 .materialCategory(category)
                 .standardCost(Optional.ofNullable(requestDTO.getStandardCost()).orElse(0L))
@@ -162,6 +163,7 @@ public class MaterialService {
                 requestDTO.getName(),
                 requestDTO.getMaterialUnit(),
                 requestDTO.getBaseQuantity(),
+                requestDTO.getStandardQuantity(),
                 requestDTO.getLeadTime(),
                 requestDTO.getStandardCost()
         );

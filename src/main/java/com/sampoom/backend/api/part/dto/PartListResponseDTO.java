@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 
 @Getter
 @NoArgsConstructor
@@ -21,6 +20,7 @@ public class PartListResponseDTO {
 
     private String partUnit;
     private Integer baseQuantity;
+    private Integer standardQuantity;
     private Integer leadTime;
 
     private Long standardCost;
@@ -38,6 +38,7 @@ public class PartListResponseDTO {
 
         this.partUnit = part.getPartUnit();
         this.baseQuantity = part.getBaseQuantity();
+        this.standardQuantity = part.getStandardQuantity();
         this.leadTime = part.getLeadTime();
 
         this.standardCost = part.getStandardCost();
