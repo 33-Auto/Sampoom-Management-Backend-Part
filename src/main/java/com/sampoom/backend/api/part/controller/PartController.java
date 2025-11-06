@@ -18,7 +18,7 @@ import java.util.List;
 @Tag(name = "Part", description = "부품 API")
 @Slf4j
 @RestController
-@RequestMapping("/api/parts")
+@RequestMapping("/parts")
 @RequiredArgsConstructor
 public class PartController {
 

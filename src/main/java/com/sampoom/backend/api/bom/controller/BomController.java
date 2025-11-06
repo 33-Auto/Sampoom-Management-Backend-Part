@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "BOM", description = "BOM API")
 @RestController
-@RequestMapping("/api/boms")
+@RequestMapping("/boms")
 @RequiredArgsConstructor
 public class BomController {
 
