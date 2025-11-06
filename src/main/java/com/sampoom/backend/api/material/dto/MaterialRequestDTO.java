@@ -5,8 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-
 @Getter
 @Builder
 @NoArgsConstructor
@@ -16,6 +14,7 @@ public class MaterialRequestDTO {
     private Long materialCategoryId;
     private String materialUnit;
     private Integer baseQuantity;  // 기준단위
+    private Integer standardQuantity;  // 기준 수량
     private Integer leadTime;      // 리드타임
     private Long standardCost;         // 표준단가
 }

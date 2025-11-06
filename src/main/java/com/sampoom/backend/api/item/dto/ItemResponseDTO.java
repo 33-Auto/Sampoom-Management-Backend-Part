@@ -41,7 +41,7 @@ public class ItemResponseDTO {
                 .unit(m.getMaterialUnit())
                 .leadTime(m.getLeadTime())
                 .baseQuantity(m.getBaseQuantity())
-                .standardQuantity(null)  // 자재는 기준 수량 없음
+                .standardQuantity(m.getStandardQuantity())
                 .standardCost(m.getStandardCost())
                 .build();
     }
