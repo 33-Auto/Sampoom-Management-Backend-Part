@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 
 @Entity
 @Getter
@@ -25,7 +24,10 @@ public class Part extends BaseTimeEntity {
 
     private String partUnit;  // 기준단위
 
-    private Integer baseQuantity;  // 기준개수
+    private Integer baseQuantity;  // 안전재고
+
+    @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 1")
+    private Integer standardQuantity = 1;  // 기준 수량 (기본값 1)
 
     private Integer leadTime = 0;  // 리드타임 (공정 기준 자동으로, 기본값 0)
 
@@ -43,12 +45,13 @@ public class Part extends BaseTimeEntity {
     @Column(nullable = false)
     private Long version; // 버전 필드 추가
 
-    public Part(String code, String name, PartGroup partGroup, String partUnit, Integer baseQuantity) {
+    public Part(String code, String name, PartGroup partGroup, String partUnit, Integer baseQuantity, Integer standardQuantity) {
         this.code = code;
         this.name = name;
         this.partGroup = partGroup;
         this.partUnit = partUnit;
         this.baseQuantity = baseQuantity;
+        this.standardQuantity = standardQuantity;
         this.leadTime = 0;
         this.status = PartStatus.ACTIVE;
         this.standardCost = 0L;
@@ -69,6 +72,11 @@ public class Part extends BaseTimeEntity {
         //  기준개수 수정
         if (partUpdateRequestDTO.getBaseQuantity() != null) {
             this.baseQuantity = partUpdateRequestDTO.getBaseQuantity();
+        }
+
+        //  기준 수량 수정
+        if (partUpdateRequestDTO.getStandardQuantity() != null) {
+            this.standardQuantity = partUpdateRequestDTO.getStandardQuantity();
         }
     }
 
