@@ -34,7 +34,7 @@ public class ItemSearchController {
             @RequestParam(required = false) Long materialCategoryId,
             @RequestParam(defaultValue = "") String keyword,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
+            @RequestParam(defaultValue = "10") int size
     ) {
         PageResponseDTO<ItemResponseDTO> result =
                 itemService.searchItems(type, partCategoryId, partGroupId, materialCategoryId, keyword, page, size);
