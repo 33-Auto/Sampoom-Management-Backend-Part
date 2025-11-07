@@ -149,7 +149,8 @@ public class BomService {
     @Transactional(readOnly = true)
     public PageResponseDTO<BomResponseDTO> getBoms(int page, int size) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        // BOM 코드 기준 오름차순 정렬
+        Pageable pageable = PageRequest.of(page, size, Sort.by("bomCode").ascending());
         Page<Bom> bomPage = bomRepository.findAll(pageable);
 
         return PageResponseDTO.<BomResponseDTO>builder()
@@ -318,7 +319,8 @@ public class BomService {
             int page,
             int size
     ) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        // BOM 코드 기준 오름차순 정렬
+        Pageable pageable = PageRequest.of(page, size, Sort.by("bomCode").ascending());
         Page<Bom> bomPage = bomRepository.findByFilters(
                 keyword,
                 categoryId,

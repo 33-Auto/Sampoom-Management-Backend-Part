@@ -20,15 +20,16 @@ JOIN b.part p
 JOIN p.partGroup g
 JOIN g.category c
 WHERE (
-  COALESCE(:keyword, '') = ''  
+  COALESCE(:keyword, '') = ''
   OR p.name ILIKE CONCAT('%', :keyword, '%')
   OR p.code ILIKE CONCAT('%', :keyword, '%')
+  OR b.bomCode ILIKE CONCAT('%', :keyword, '%')
 )
 AND (:categoryId IS NULL OR c.id = :categoryId)
 AND (:groupId    IS NULL OR g.id = :groupId)
 AND (:status IS NULL OR b.status = :status)
 AND (:complexity IS NULL OR b.complexity = :complexity)
-ORDER BY b.createdAt DESC
+ORDER BY b.bomCode ASC
 """)
     Page<Bom> findByFilters(
             @Param("keyword") String keyword,
