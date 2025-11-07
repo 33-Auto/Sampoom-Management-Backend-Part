@@ -257,10 +257,11 @@ public class MaterialService {
         Page<Material> materials = materialRepository.findAll((root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            // keyword
+            // keyword (대소문자 구분 없음)
             if (keyword != null && !keyword.isBlank()) {
-                Predicate nameLike = cb.like(root.get("name"), "%" + keyword + "%");
-                Predicate codeLike = cb.like(root.get("materialCode"), "%" + keyword + "%");
+                String lowerKeyword = "%" + keyword.toLowerCase() + "%";
+                Predicate nameLike = cb.like(cb.lower(root.get("name")), lowerKeyword);
+                Predicate codeLike = cb.like(cb.lower(root.get("materialCode")), lowerKeyword);
                 predicates.add(cb.or(nameLike, codeLike));
             }
 
