@@ -306,4 +306,13 @@ public class MaterialService {
 
         return String.format("%s-%04d", category.getCode(), nextSeq);
     }
+
+    // 자재 상세조회
+    @Transactional(readOnly = true)
+    public MaterialResponseDTO getMaterialById(Long materialId) {
+        Material material = materialRepository.findById(materialId)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.MATERIAL_NOT_FOUND));
+
+        return new MaterialResponseDTO(material);
+    }
 }

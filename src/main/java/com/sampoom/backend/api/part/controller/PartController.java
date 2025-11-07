@@ -87,6 +87,14 @@ public class PartController {
         return ApiResponse.success(SuccessStatus.PART_UPDATE_SUCCESS, partResponse);
     }
 
+    @Operation(summary = "부품 상세조회", description = "부품 ID로 상세 정보 조회")
+    @GetMapping("/{partId}")
+    public ResponseEntity<ApiResponse<PartListResponseDTO>> getPartById(@PathVariable Long partId) {
+        PartListResponseDTO partResponse = partService.getPartById(partId);
+
+        return ApiResponse.success(SuccessStatus.PART_GET_SUCCESS, partResponse);
+    }
+
 //    @Operation(summary = "부품 삭제", description = "부품 삭제")
 //    @DeleteMapping("/{partId}")
 //    public ResponseEntity<ApiResponse<Void>> deletePart(@PathVariable Long partId) {

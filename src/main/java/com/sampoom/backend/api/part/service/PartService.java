@@ -481,4 +481,13 @@ public class PartService {
         Process process = processRepository.findByPartId(partId).orElse(null);
         return process != null ? process.getTotalProcessCost() : 0L;
     }
+
+    // 부품 상세조회
+    @Transactional(readOnly = true)
+    public PartListResponseDTO getPartById(Long partId) {
+        Part part = partRepository.findById(partId)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.PART_NOT_FOUND));
+
+        return new PartListResponseDTO(part);
+    }
 }

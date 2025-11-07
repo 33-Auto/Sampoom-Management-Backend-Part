@@ -21,6 +21,7 @@ public enum SuccessStatus {
     PART_LIST_SUCCESS(HttpStatus.OK, "부품 목록 조회 성공"),
     PART_CREATE_SUCCESS(HttpStatus.OK, "부품 생성 성공"),
     PART_UPDATE_SUCCESS(HttpStatus.OK, "부품 수정 성공"),
+    PART_GET_SUCCESS(HttpStatus.OK, "부품 상세 조회 성공"),
     PART_DELETE_SUCCESS(HttpStatus.OK, "부품 삭제 성공"),
     PART_SEARCH_SUCCESS(HttpStatus.OK, "부품 검색 성공"),
     PART_DETAIL_SUCCESS(HttpStatus.OK, "부품 상세 조회 성공"),
@@ -34,6 +35,7 @@ public enum SuccessStatus {
 
     MATERIAL_LIST_SUCCESS(HttpStatus.OK, "자재 목록 조회 성공"),
     ITEM_LIST_SUCCESS(HttpStatus.OK, "자재/부품 전체 조회 성공"),
+    MATERIAL_GET_SUCCESS(HttpStatus.OK, "자재 상세 조회 성공"),
 
     ;
 
