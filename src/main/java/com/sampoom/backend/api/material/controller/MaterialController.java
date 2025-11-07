@@ -65,6 +65,14 @@ public class MaterialController {
         return ApiResponse.success(SuccessStatus.OK,materialService.updateMaterial(id, materialRequestDTO));
     }
 
+    @Operation(summary = "자재 상세조회", description = "자재 ID로 상세 정보를 조회합니다.")
+    @GetMapping("/{materialId}")
+    public ResponseEntity<ApiResponse<MaterialResponseDTO>> getMaterialById(@PathVariable("materialId") Long id) {
+        MaterialResponseDTO materialResponse = materialService.getMaterialById(id);
+
+        return ApiResponse.success(SuccessStatus.MATERIAL_GET_SUCCESS, materialResponse);
+    }
+
     @Operation(summary = "자재 삭제", description = "자재를 삭제합니다.")
     @DeleteMapping("/{materialId}")
     public ResponseEntity<ApiResponse<Void>> deleteMaterial(@PathVariable("materialId") Long id) {
