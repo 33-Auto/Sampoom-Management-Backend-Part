@@ -16,7 +16,7 @@ public class MaterialEventBatchRunner implements CommandLineRunner {
     public void run(String... args) {
         try {
 //            materialEventBatchService.publishAllMaterialCategoryEvents();
-//            materialEventBatchService.publishAllMaterialEvents();
+            materialEventBatchService.publishAllMaterialEvents();
 
             log.info("✅ 모든 Material 관련 이벤트 발행 완료");
         } catch (Exception e) {
