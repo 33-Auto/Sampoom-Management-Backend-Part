@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -308,7 +309,8 @@ public class PartService {
             int page,
             int size
     ) {
-        PageRequest pageable = PageRequest.of(page, size);
+        // 코드순 정렬 추가
+        PageRequest pageable = PageRequest.of(page, size, Sort.by("code").ascending());
 
         Page<Part> parts = partRepository.findAll((root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -316,10 +318,11 @@ public class PartService {
             // 상태 필터
             predicates.add(cb.equal(root.get("status"), PartStatus.ACTIVE));
 
-            // keyword 검색
+            // keyword 검색 (대소문자 구분 없음)
             if (keyword != null && !keyword.isBlank()) {
-                Predicate nameLike = cb.like(root.get("name"), "%" + keyword + "%");
-                Predicate codeLike = cb.like(root.get("code"), "%" + keyword + "%");
+                String lowerKeyword = "%" + keyword.toLowerCase() + "%";
+                Predicate nameLike = cb.like(cb.lower(root.get("name")), lowerKeyword);
+                Predicate codeLike = cb.like(cb.lower(root.get("code")), lowerKeyword);
                 predicates.add(cb.or(nameLike, codeLike));
             }
 
