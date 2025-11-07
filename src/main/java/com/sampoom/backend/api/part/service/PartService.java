@@ -151,27 +151,35 @@ public class PartService {
             }
         }
 
-        PartEvent.Payload payload = PartEvent.Payload.builder()
-                .partId(savedPart.getId())
-                .code(savedPart.getCode())
-                .name(savedPart.getName())
-                .partUnit(savedPart.getPartUnit())
-                .baseQuantity(savedPart.getBaseQuantity())
-                .leadTime(savedPart.getLeadTime())
-                .status(savedPart.getStatus().name())
-                .deleted(false)
-                .groupId(partGroup.getId())
-                .categoryId(partGroup.getCategory().getId())
-                .standardCost(savedPart.getStandardCost())
+        // 전체 PartEvent 객체 생성
+        PartEvent partEvent = PartEvent.builder()
+                .eventId(java.util.UUID.randomUUID().toString())
+                .eventType("PartCreated")
+                .version(savedPart.getVersion())
+                .occurredAt(java.time.OffsetDateTime.now().toString())
+                .payload(PartEvent.Payload.builder()
+                        .partId(savedPart.getId())
+                        .code(savedPart.getCode())
+                        .name(savedPart.getName())
+                        .partUnit(savedPart.getPartUnit())
+                        .baseQuantity(savedPart.getBaseQuantity())
+                        .standardQuantity(savedPart.getStandardQuantity())
+                        .leadTime(savedPart.getLeadTime())
+                        .status(savedPart.getStatus().name())
+                        .deleted(false)
+                        .groupId(partGroup.getId())
+                        .categoryId(partGroup.getCategory().getId())
+                        .standardCost(savedPart.getStandardCost())
+                        .build())
                 .build();
 
-        // OutboxService 호출
+        // OutboxService 호출 (전체 이벤트 객체)
         outboxService.saveEvent(
                 "PART",
                 savedPart.getId(),
                 "PartCreated",
                 savedPart.getVersion(),
-                payload
+                partEvent.getPayload()
         );
 
         return new PartListResponseDTO(savedPart);
@@ -204,18 +212,26 @@ public class PartService {
 
             partRepository.flush();
 
-            PartEvent.Payload payload = PartEvent.Payload.builder()
-                    .partId(part.getId())
-                    .code(part.getCode())
-                    .name(part.getName())
-                    .partUnit(part.getPartUnit())
-                    .baseQuantity(part.getBaseQuantity())
-                    .leadTime(part.getLeadTime())
-                    .status(part.getStatus().name())
-                    .deleted(false)
-                    .groupId(part.getPartGroup().getId())
-                    .categoryId(part.getPartGroup().getCategory().getId())
-                    .standardCost(part.getStandardCost())
+            // 전체 PartEvent 객체 생성
+            PartEvent partEvent = PartEvent.builder()
+                    .eventId(java.util.UUID.randomUUID().toString())
+                    .eventType("PartUpdated")
+                    .version(part.getVersion())
+                    .occurredAt(java.time.OffsetDateTime.now().toString())
+                    .payload(PartEvent.Payload.builder()
+                            .partId(part.getId())
+                            .code(part.getCode())
+                            .name(part.getName())
+                            .partUnit(part.getPartUnit())
+                            .baseQuantity(part.getBaseQuantity())
+                            .standardQuantity(part.getStandardQuantity() != null ? part.getStandardQuantity() : 1)
+                            .leadTime(part.getLeadTime())
+                            .status(part.getStatus().name())
+                            .deleted(false)
+                            .groupId(part.getPartGroup().getId())
+                            .categoryId(part.getPartGroup().getCategory().getId())
+                            .standardCost(part.getStandardCost())
+                            .build())
                     .build();
 
             // OutboxService 호출
@@ -224,7 +240,7 @@ public class PartService {
                     part.getId(),
                     "PartUpdated",
                     part.getVersion(),
-                    payload
+                    partEvent.getPayload()
             );
 
             return new PartListResponseDTO(part);
@@ -248,27 +264,35 @@ public class PartService {
 
         partRepository.flush();
 
-        PartEvent.Payload payload = PartEvent.Payload.builder()
-                .partId(part.getId())
-                .code(part.getCode())
-                .name(part.getName())
-                .partUnit(part.getPartUnit())
-                .baseQuantity(part.getBaseQuantity())
-                .leadTime(part.getLeadTime())
-                .status(part.getStatus().name()) // "DISCONTINUED"
-                .deleted(true)
-                .groupId(part.getPartGroup().getId())
-                .categoryId(part.getPartGroup().getCategory().getId())
-                .standardCost(part.getStandardCost())
+        // 전체 PartEvent 객체 생성
+        PartEvent partEvent = PartEvent.builder()
+                .eventId(java.util.UUID.randomUUID().toString())
+                .eventType("PartDeleted")
+                .version(part.getVersion())
+                .occurredAt(java.time.OffsetDateTime.now().toString())
+                .payload(PartEvent.Payload.builder()
+                        .partId(part.getId())
+                        .code(part.getCode())
+                        .name(part.getName())
+                        .partUnit(part.getPartUnit())
+                        .baseQuantity(part.getBaseQuantity())
+                        .standardQuantity(part.getStandardQuantity() != null ? part.getStandardQuantity() : 1)
+                        .leadTime(part.getLeadTime())
+                        .status(part.getStatus().name()) // "DISCONTINUED"
+                        .deleted(true)
+                        .groupId(part.getPartGroup().getId())
+                        .categoryId(part.getPartGroup().getCategory().getId())
+                        .standardCost(part.getStandardCost())
+                        .build())
                 .build();
 
-        // OutboxService 호출
+        // OutboxService 호출 (전체 이벤트 객체)
         outboxService.saveEvent(
                 "PART",
                 part.getId(),
                 "PartDeleted",
                 part.getVersion(),
-                payload
+                partEvent.getPayload()
         );
     }
 
@@ -387,18 +411,26 @@ public class PartService {
     // 이벤트 발행 헬퍼 메서드
     @Transactional(readOnly = true)
     public void publishPartUpdatedEvent(Part part) {
-        PartEvent.Payload payload = PartEvent.Payload.builder()
-                .partId(part.getId())
-                .code(part.getCode())
-                .name(part.getName())
-                .partUnit(part.getPartUnit())
-                .baseQuantity(part.getBaseQuantity())
-                .leadTime(part.getLeadTime())
-                .status(part.getStatus().name())
-                .deleted(part.getStatus() == PartStatus.DISCONTINUED)
-                .groupId(part.getPartGroup().getId())
-                .categoryId(part.getPartGroup().getCategory().getId())
-                .standardCost(part.getStandardCost())
+        // 전체 PartEvent 객체 생성
+        PartEvent partEvent = PartEvent.builder()
+                .eventId(java.util.UUID.randomUUID().toString())
+                .eventType("PartUpdated")
+                .version(part.getVersion())
+                .occurredAt(java.time.OffsetDateTime.now().toString())
+                .payload(PartEvent.Payload.builder()
+                        .partId(part.getId())
+                        .code(part.getCode())
+                        .name(part.getName())
+                        .partUnit(part.getPartUnit())
+                        .baseQuantity(part.getBaseQuantity())
+                        .standardQuantity(part.getStandardQuantity() != null ? part.getStandardQuantity() : 1)
+                        .leadTime(part.getLeadTime())
+                        .status(part.getStatus().name())
+                        .deleted(part.getStatus() == PartStatus.DISCONTINUED)
+                        .groupId(part.getPartGroup().getId())
+                        .categoryId(part.getPartGroup().getCategory().getId())
+                        .standardCost(part.getStandardCost())
+                        .build())
                 .build();
 
         outboxService.saveEvent(
@@ -406,7 +438,7 @@ public class PartService {
                 part.getId(),
                 "PartUpdated",
                 part.getVersion(),
-                payload
+                partEvent.getPayload()
         );
     }
 
