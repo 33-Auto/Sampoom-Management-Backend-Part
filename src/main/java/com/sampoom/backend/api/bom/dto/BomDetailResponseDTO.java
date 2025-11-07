@@ -32,12 +32,11 @@ public class BomDetailResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class BomMaterialDTO {
-        private Long id;
         private Long materialId;
         private String materialName;
         private String materialCode;
         private String unit;
-        private Long quantity;
+        private Double quantity;
         private Long standardCost;  // 단가
         private Long total;  // 단가 * 수량
     }
@@ -46,10 +45,9 @@ public class BomDetailResponseDTO {
         List<BomMaterialDTO> materialDtos = bom.getMaterials().stream()
                 .map(material -> {
                     Long cost = Optional.ofNullable(material.getMaterial().getStandardCost()).orElse(0L);
-                    Long total = cost * Optional.ofNullable(material.getQuantity()).orElse(0L);
+                    Long total = cost * Optional.ofNullable(material.getQuantity()).orElse(0.0).longValue();
 
                     return BomMaterialDTO.builder()
-                            .id(material.getId())
                             .materialId(material.getMaterial().getId())
                             .materialName(material.getMaterial().getName())
                             .materialCode(material.getMaterial().getMaterialCode())

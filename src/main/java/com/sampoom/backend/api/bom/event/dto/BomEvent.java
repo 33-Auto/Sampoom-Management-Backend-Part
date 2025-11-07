@@ -45,7 +45,7 @@ public class BomEvent {
             private String materialName;
             private String materialCode;
             private String unit;
-            private Long quantity;
+            private Double quantity;
         }
     }
 }

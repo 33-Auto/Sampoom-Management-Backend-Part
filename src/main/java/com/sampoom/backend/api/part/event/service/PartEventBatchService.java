@@ -61,6 +61,7 @@ public class PartEventBatchService {
                                 .groupId(group != null ? group.getId() : null)
                                 .categoryId(category != null ? category.getId() : null)
                                 .standardCost(part.getStandardCost())
+                                .standardTotalCost(part.getStandardTotalCost())
                                 .build())
                         .build();
 
