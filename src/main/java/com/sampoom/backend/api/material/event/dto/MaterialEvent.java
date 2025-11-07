@@ -32,5 +32,6 @@ public class MaterialEvent {
         private boolean deleted;
         private Long materialCategoryId;
         private Long standardCost;
+        private Long standardTotalCost; // 표준총비용 추가
     }
 }

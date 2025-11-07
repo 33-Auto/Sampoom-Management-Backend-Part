@@ -44,6 +44,7 @@ public class MaterialEventBatchService {
                                 .standardQuantity(material.getStandardQuantity() != null ? material.getStandardQuantity() : 1)
                                 .leadTime(material.getLeadTime())
                                 .standardCost(material.getStandardCost())
+                                .standardTotalCost(material.getStandardTotalCost())
                                 .deleted(false)
                                 .materialCategoryId(material.getMaterialCategory().getId())
                                 .build())

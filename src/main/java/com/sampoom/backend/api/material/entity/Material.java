@@ -40,8 +40,18 @@ public class Material {
 
     private Long standardCost; // 표준단가
 
+    @Column(name = "standard_total_cost")
+    private Long standardTotalCost; // 표준총비용 (standardCost * standardQuantity)
+
     @Version
     private Long version; // JPA가 자동 관리 (낙관적 락 + 자동 증가)
+
+    @PostLoad
+    @PrePersist
+    @PreUpdate
+    private void updateStandardTotalCost() {
+        this.standardTotalCost = calculateStandardTotalCost();
+    }
 
     /** 이름/단위/기준단위/리드타임/기준수량 수정 */
     public void updateBasicInfo(String name, String unit, Integer baseQuantity, Integer standardQuantity, Integer leadTime, Long standardCost) {
@@ -51,11 +61,32 @@ public class Material {
         this.standardQuantity = standardQuantity != null ? standardQuantity : 1;
         this.leadTime = leadTime;
         this.standardCost = standardCost;
+        updateStandardTotalCost();
     }
 
     /** 카테고리 변경 + 코드 재발급 */
     public void changeCategory(MaterialCategory newCategory, String newCode) {
         this.materialCategory = newCategory;
         this.materialCode = newCode;
+    }
+
+    /** 표준총비용 계산 */
+    private Long calculateStandardTotalCost() {
+        if (this.standardCost == null || this.standardQuantity == null) {
+            return null;
+        }
+        return this.standardCost * this.standardQuantity;
+    }
+
+    /** 표준비용 업데이트 시 총비용도 함께 업데이트 */
+    public void updateStandardCost(Long standardCost) {
+        this.standardCost = standardCost;
+        updateStandardTotalCost();
+    }
+
+    /** 표준수량 업데이트 시 총비용도 함께 업데이트 */
+    public void updateStandardQuantity(Integer standardQuantity) {
+        this.standardQuantity = standardQuantity != null ? standardQuantity : 1;
+        updateStandardTotalCost();
     }
 }

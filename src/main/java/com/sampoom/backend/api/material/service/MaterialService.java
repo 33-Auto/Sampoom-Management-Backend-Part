@@ -126,6 +126,7 @@ public class MaterialService {
                         .deleted(false)
                         .materialCategoryId(category.getId())
                         .standardCost(material.getStandardCost())
+                        .standardTotalCost(material.getStandardTotalCost())
                         .build())
                 .build();
 
@@ -188,6 +189,7 @@ public class MaterialService {
                         .deleted(false)
                         .materialCategoryId(material.getMaterialCategory().getId())
                         .standardCost(material.getStandardCost())
+                        .standardTotalCost(material.getStandardTotalCost())
                         .build())
                 .build();
 
@@ -225,6 +227,7 @@ public class MaterialService {
                         .deleted(true)
                         .materialCategoryId(material.getMaterialCategory().getId())
                         .standardCost(material.getStandardCost())
+                        .standardTotalCost(material.getStandardTotalCost())
                         .build())
                 .build();
 
