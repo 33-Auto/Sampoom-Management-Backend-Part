@@ -102,7 +102,8 @@ public class ProcessService {
         int safePage = Math.max(page, 0);
         int safeSize = Math.min(Math.max(size, 1), 100);
 
-        Pageable pageable = PageRequest.of(safePage, safeSize, Sort.by(Sort.Direction.DESC, "id"));
+        // 공정 코드 기준 오름차순 정렬
+        Pageable pageable = PageRequest.of(safePage, safeSize, Sort.by("code").ascending());
 
         String keyword = (q == null || q.isBlank()) ? null : q.trim();
         Page<Process> result = processRepository.search(keyword, status, categoryId, groupId, pageable);
