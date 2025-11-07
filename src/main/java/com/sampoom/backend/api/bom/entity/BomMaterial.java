@@ -27,13 +27,13 @@ public class BomMaterial {
     @JoinColumn(name = "material_id", nullable = false)
     private Material material;
 
-    private Long quantity;
+    private Double quantity;
 
     public void updateBom(Bom bom) {
         this.bom = bom;
     }
 
-    public void updateQuantity(Long quantity) {
+    public void updateQuantity(Double quantity) {
         this.quantity = quantity;
     }
 

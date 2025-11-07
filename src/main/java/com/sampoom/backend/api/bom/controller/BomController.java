@@ -77,4 +77,18 @@ public class BomController {
         return ApiResponse.success(SuccessStatus.OK,
                 bomService.searchBoms(keyword, categoryId, groupId, status, complexity, page, size));
     }
+//
+//    @Operation(summary = "모든 BOM totalCost 재계산", description = "quantity가 Double로 변경된 후 모든 BOM의 totalCost를 재계산합니다.")
+//    @PostMapping("/recalculate-all-costs")
+//    public ResponseEntity<ApiResponse<Void>> recalculateAllBomTotalCosts() {
+//        bomService.recalculateAllBomTotalCosts();
+//        return ApiResponse.success_only(SuccessStatus.OK);
+//    }
+//
+//    @Operation(summary = "특정 BOM totalCost 재계산", description = "특정 BOM의 totalCost를 재계산합니다.")
+//    @PostMapping("/{bomId}/recalculate-cost")
+//    public ResponseEntity<ApiResponse<Void>> recalculateBomTotalCost(@PathVariable Long bomId) {
+//        bomService.recalculateBomTotalCost(bomId);
+//        return ApiResponse.success_only(SuccessStatus.OK);
+//    }
 }

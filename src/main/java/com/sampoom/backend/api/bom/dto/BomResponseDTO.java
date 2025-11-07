@@ -57,8 +57,8 @@ public class BomResponseDTO {
 
         // 실시간 계산
         int componentCount = materials.size();
-        long totalQuantity = materials.stream()
-                .mapToLong(BomMaterialResponse::getQuantity)
+        long totalQuantity = (long) materials.stream()
+                .mapToDouble(BomMaterialResponse::getQuantity)
                 .sum();
 
         return BomResponseDTO.builder()
@@ -93,16 +93,13 @@ public class BomResponseDTO {
         private String materialName;
         private String materialCode;
         private String unit;
-        private Long quantity;
+        private Double quantity;
         private Long standardCost;
         private Long total;  // 단가 * 수량
 
         public static BomMaterialResponse from(BomMaterial bm) {
             Long cost = bm.getMaterial().getStandardCost() != null
-                    ? bm.getMaterial().getStandardCost()
-                    : 0L;
-            Long total = cost * bm.getQuantity();
-
+                    ? bm.getMaterial().getStandardCost() : 0L;
             return BomMaterialResponse.builder()
                     .materialId(bm.getMaterial().getId())
                     .materialName(bm.getMaterial().getName())
@@ -110,7 +107,7 @@ public class BomResponseDTO {
                     .unit(bm.getMaterial().getMaterialUnit())
                     .quantity(bm.getQuantity())
                     .standardCost(cost)
-                    .total(total)
+                    .total(cost * bm.getQuantity().longValue()) // Double을 Long으로 변환
                     .build();
         }
     }

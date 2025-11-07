@@ -23,6 +23,6 @@ public class BomRequestDTO {
     @Builder
     public static class BomMaterialDTO {
         private Long materialId;
-        private Long quantity;
+        private Double quantity;
     }
 }
