@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -308,7 +309,8 @@ public class PartService {
             int page,
             int size
     ) {
-        PageRequest pageable = PageRequest.of(page, size);
+        // 코드순 정렬 추가
+        PageRequest pageable = PageRequest.of(page, size, Sort.by("code").ascending());
 
         Page<Part> parts = partRepository.findAll((root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();

@@ -76,7 +76,7 @@ public class ItemService {
                 .build();
     }
 
-    // ALL 타입 검색
+    // ALL 타입 검색 (효율성 개선)
     private PageResponseDTO<ItemResponseDTO> searchAllItems(
             String keyword,
             Long partCategoryId,
@@ -85,17 +85,20 @@ public class ItemService {
             int page,
             int size
     ) {
-        // 전체 데이터를 한 번에 가져와서 병합 후 페이지네이션
+        // 각각 적절한 크기로 데이터 가져오기 (페이지 크기의 2배씩)
+        int fetchSize = size * 2;
 
-        // 부품 데이터를 모두 가져오기 (부품 관련 필터만 적용)
-        PageResponseDTO<PartListResponseDTO> allParts = partService.searchParts(keyword, partCategoryId, partGroupId, 0, Integer.MAX_VALUE);
-        List<ItemResponseDTO> partItems = allParts.getContent().stream()
+        // 부품 데이터 가져오기
+        PageResponseDTO<PartListResponseDTO> partResponse = partService.searchParts(
+                keyword, partCategoryId, partGroupId, 0, fetchSize);
+        List<ItemResponseDTO> partItems = partResponse.getContent().stream()
                 .map(ItemResponseDTO::ofPart)
                 .toList();
 
-        // 자재 데이터를 모두 가져오기 (자재 관련 필터만 적용)
-        PageResponseDTO<MaterialResponseDTO> allMaterials = materialService.searchMaterials(keyword, materialCategoryId, 0, Integer.MAX_VALUE);
-        List<ItemResponseDTO> materialItems = allMaterials.getContent().stream()
+        // 자재 데이터 가져오기
+        PageResponseDTO<MaterialResponseDTO> materialResponse = materialService.searchMaterials(
+                keyword, materialCategoryId, 0, fetchSize);
+        List<ItemResponseDTO> materialItems = materialResponse.getContent().stream()
                 .map(ItemResponseDTO::ofMaterial)
                 .toList();
 
@@ -104,8 +107,18 @@ public class ItemService {
         allItems.addAll(partItems);
         allItems.addAll(materialItems);
 
-        // 전체 개수
-        long totalElements = allItems.size();
+        // 코드순으로 정렬 (이미 각각은 정렬되어 있지만 병합 후 다시 정렬 필요)
+        allItems.sort((item1, item2) -> {
+            String code1 = item1.getCode();
+            String code2 = item2.getCode();
+            if (code1 == null && code2 == null) return 0;
+            if (code1 == null) return 1;
+            if (code2 == null) return -1;
+            return code1.compareTo(code2);
+        });
+
+        // 전체 개수 계산 (실제 DB에서 가져온 총 개수)
+        long totalElements = partResponse.getTotalElements() + materialResponse.getTotalElements();
         int totalPages = (int) Math.ceil((double) totalElements / size);
 
         // 현재 페이지에 해당하는 데이터 추출
