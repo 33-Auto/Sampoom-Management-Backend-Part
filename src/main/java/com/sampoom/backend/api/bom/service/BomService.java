@@ -55,11 +55,11 @@ public class BomService {
         }
 
         // 요청 자재 중복 제거 및 수량 합산
-        Map<Long, Long> idToQty = requestDTO.getMaterials().stream()
+        Map<Long, Double> idToQty = requestDTO.getMaterials().stream()
                 .collect(Collectors.toMap(
                         BomRequestDTO.BomMaterialDTO::getMaterialId,
                         BomRequestDTO.BomMaterialDTO::getQuantity,
-                        Long::sum // 중복 materialId 수량 합산
+                        Double::sum // 중복 materialId 수량 합산
                 ));
 
         // 한 번의 쿼리로 모든 자재 조회 (N+1 방지)
@@ -105,7 +105,7 @@ public class BomService {
 
         // 5️⃣ 자재 매핑
         for (Material material : materials) {
-            Long quantity = idToQty.get(material.getId());
+            Double quantity = idToQty.get(material.getId());
             BomMaterial bm = BomMaterial.builder()
                     .bom(bom)
                     .material(material)
@@ -345,6 +345,29 @@ public class BomService {
         Bom bom = bomRepository.findById(bomId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.BOM_NOT_FOUND));
         bom.updateStatus(newStatus);
+        bomRepository.save(bom);
+    }
+
+    /**
+     * 모든 BOM의 totalCost 재계산 (quantity가 Double로 변경된 후 실행)
+     */
+    @Transactional
+    public void recalculateAllBomTotalCosts() {
+        List<Bom> boms = bomRepository.findAll();
+        for (Bom bom : boms) {
+            bom.calculateTotalCost();
+        }
+        bomRepository.saveAll(boms);
+    }
+
+    /**
+     * 특정 BOM의 totalCost 재계산
+     */
+    @Transactional
+    public void recalculateBomTotalCost(Long bomId) {
+        Bom bom = bomRepository.findById(bomId)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.BOM_NOT_FOUND));
+        bom.calculateTotalCost();
         bomRepository.save(bom);
     }
 }

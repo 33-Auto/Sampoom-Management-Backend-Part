@@ -35,5 +35,6 @@ public class PartEvent {
         private Long categoryId;
 
         private Long standardCost;
+        private Long standardTotalCost; // 표준 총비용 추가
     }
 }

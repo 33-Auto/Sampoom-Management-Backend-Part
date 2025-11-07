@@ -170,6 +170,7 @@ public class PartService {
                         .groupId(partGroup.getId())
                         .categoryId(partGroup.getCategory().getId())
                         .standardCost(savedPart.getStandardCost())
+                        .standardTotalCost(savedPart.getStandardTotalCost())
                         .build())
                 .build();
 
@@ -231,6 +232,7 @@ public class PartService {
                             .groupId(part.getPartGroup().getId())
                             .categoryId(part.getPartGroup().getCategory().getId())
                             .standardCost(part.getStandardCost())
+                            .standardTotalCost(part.getStandardTotalCost())
                             .build())
                     .build();
 
@@ -283,6 +285,7 @@ public class PartService {
                         .groupId(part.getPartGroup().getId())
                         .categoryId(part.getPartGroup().getCategory().getId())
                         .standardCost(part.getStandardCost())
+                        .standardTotalCost(part.getStandardTotalCost())
                         .build())
                 .build();
 
@@ -430,6 +433,7 @@ public class PartService {
                         .groupId(part.getPartGroup().getId())
                         .categoryId(part.getPartGroup().getCategory().getId())
                         .standardCost(part.getStandardCost())
+                        .standardTotalCost(part.getStandardTotalCost())
                         .build())
                 .build();
 
@@ -482,6 +486,7 @@ public class PartService {
         return process != null ? process.getTotalProcessCost() : 0L;
     }
 
+
     // 부품 상세조회
     @Transactional(readOnly = true)
     public PartListResponseDTO getPartById(Long partId) {
@@ -489,5 +494,34 @@ public class PartService {
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.PART_NOT_FOUND));
 
         return new PartListResponseDTO(part);
+    }
+  
+    /**
+     * 모든 Part의 standard_total_cost 재계산
+     */
+    @Transactional
+    public void recalculateAllPartStandardCosts() {
+        List<Part> parts = partRepository.findAll();
+        for (Part part : parts) {
+            Long bomCost = getBomCostByPartId(part.getId());
+            Long processCost = getProcessCostByPartId(part.getId());
+            part.calculateStandardCost(bomCost, processCost);
+        }
+        partRepository.saveAll(parts);
+    }
+
+    /**
+     * 특정 Part의 standard_total_cost 재계산
+     */
+    @Transactional
+    public void recalculatePartStandardCost(Long partId) {
+        Part part = partRepository.findById(partId)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.PART_NOT_FOUND));
+
+        Long bomCost = getBomCostByPartId(partId);
+        Long processCost = getProcessCostByPartId(partId);
+        part.calculateStandardCost(bomCost, processCost);
+
+        partRepository.save(part);
     }
 }

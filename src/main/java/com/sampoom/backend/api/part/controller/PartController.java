@@ -115,4 +115,18 @@ public class PartController {
 //
 //        return ApiResponse.success(SuccessStatus.PART_LIST_SUCCESS, partPage);
 //    }
+//
+//    @Operation(summary = "모든 Part standard_total_cost 재계산", description = "standard_total_cost 컬럼 추가 후 모든 Part의 비용을 재계산합니다.")
+//    @PostMapping("/recalculate-all-costs")
+//    public ResponseEntity<ApiResponse<Void>> recalculateAllPartStandardCosts() {
+//        partService.recalculateAllPartStandardCosts();
+//        return ApiResponse.success_only(SuccessStatus.OK);
+//    }
+//
+//    @Operation(summary = "특정 Part standard_total_cost 재계산", description = "특정 Part의 standard_total_cost를 재계산합니다.")
+//    @PostMapping("/{partId}/recalculate-cost")
+//    public ResponseEntity<ApiResponse<Void>> recalculatePartStandardCost(@PathVariable Long partId) {
+//        partService.recalculatePartStandardCost(partId);
+//        return ApiResponse.success_only(SuccessStatus.OK);
+//    }
 }

@@ -70,8 +70,8 @@ public class Bom extends BaseTimeEntity {
     public void calculateTotalCost() {
         this.totalCost = this.materials.stream()
                 .mapToLong(m -> {
-                    if (m.getMaterial().getStandardCost() == null) return 0L;
-                    return m.getMaterial().getStandardCost() * m.getQuantity();
+                    if (m.getMaterial().getStandardCost() == null || m.getQuantity() == null) return 0L;
+                    return (long) (m.getMaterial().getStandardCost() * m.getQuantity());
                 })
                 .sum();
     }

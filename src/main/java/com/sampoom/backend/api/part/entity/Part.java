@@ -36,6 +36,8 @@ public class Part extends BaseTimeEntity {
 
     private Long standardCost; // 표준 단가 (자동 계산, 입력 X)
 
+    @Column(name = "standard_total_cost")
+    private Long standardTotalCost; // 표준 총비용 (BOM 비용 * 기준수량 + 공정비)
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id", nullable = false)
@@ -99,11 +101,67 @@ public class Part extends BaseTimeEntity {
 
     // Part의 총 비용을 BOM 비용과 Process 비용을 합쳐서 계산하는 메서드
     public void calculateStandardCost(Long bomCost, Long processCost) {
-        this.standardCost = (bomCost != null ? bomCost : 0L) + (processCost != null ? processCost : 0L);
+        // standard_total_cost = bom 비용 * standard_quantity + 공정비
+        Long bomTotalCost = (bomCost != null ? bomCost : 0L) * (standardQuantity != null ? standardQuantity : 1);
+        Long totalProcessCost = processCost != null ? processCost : 0L;
+        this.standardTotalCost = bomTotalCost + totalProcessCost;
+
+        // standard_cost = standard_total_cost / standard_quantity (1000원 단위로 반올림)
+        Long rawStandardCost = this.standardQuantity != null && this.standardQuantity > 0
+            ? this.standardTotalCost / this.standardQuantity
+            : this.standardTotalCost;
+        this.standardCost = roundToThousand(rawStandardCost);
+    }
+
+    // BOM 비용과 공정비를 분리해서 계산하는 새로운 메서드
+    public void calculateStandardCostAndTotal(Long bomCost, Long processCost) {
+        Long bomUnitCost = bomCost != null ? bomCost : 0L;
+        Long processUnitCost = processCost != null ? processCost : 0L;
+        Integer qty = standardQuantity != null ? standardQuantity : 1;
+
+        // standard_total_cost = bom 비용 * standard_quantity + 공정비
+        this.standardTotalCost = (bomUnitCost * qty) + processUnitCost;
+
+        // standard_cost = standard_total_cost / standard_quantity (1000원 단위로 반올림)
+        Long rawStandardCost = qty > 0 ? this.standardTotalCost / qty : this.standardTotalCost;
+        this.standardCost = roundToThousand(rawStandardCost);
     }
 
     // standardCost 직접 설정 메서드 (필요시)
     public void setStandardCost(Long standardCost) {
-        this.standardCost = standardCost;
+        this.standardCost = roundToThousand(standardCost);
+    }
+
+    // standardTotalCost 직접 설정 메서드
+    public void setStandardTotalCost(Long standardTotalCost) {
+        this.standardTotalCost = standardTotalCost;
+        // standard_cost 재계산 (1000원 단위로 반올림)
+        Long rawStandardCost = this.standardQuantity != null && this.standardQuantity > 0
+            ? this.standardTotalCost / this.standardQuantity
+            : this.standardTotalCost;
+        this.standardCost = roundToThousand(rawStandardCost);
+    }
+
+    // standardQuantity 변경 시 비용 재계산
+    public void updateStandardQuantity(Integer standardQuantity) {
+        this.standardQuantity = standardQuantity;
+        // 기존 standardTotalCost가 있다면 standardCost 재계산 (1000원 단위로 반올림)
+        if (this.standardTotalCost != null) {
+            Long rawStandardCost = standardQuantity != null && standardQuantity > 0
+                ? this.standardTotalCost / standardQuantity
+                : this.standardTotalCost;
+            this.standardCost = roundToThousand(rawStandardCost);
+        }
+    }
+
+    /**
+     * 1000원 단위로 반올림하는 헬퍼 메서드
+     */
+    private Long roundToThousand(Long amount) {
+        if (amount == null) {
+            return null;
+        }
+        // 1000으로 나누고 반올림한 후 다시 1000을 곱함
+        return Math.round(amount / 1000.0) * 1000L;
     }
 }
