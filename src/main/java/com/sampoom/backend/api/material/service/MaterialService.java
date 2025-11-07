@@ -109,24 +109,24 @@ public class MaterialService {
 
         materialRepository.save(material);
 
-        // 이벤트 발행 - 부품 이벤트와 같은 방식으로 수정
-        MaterialEvent.Payload payload = MaterialEvent.Payload.builder()
-                .materialId(material.getId())
-                .materialCode(material.getMaterialCode())
-                .name(material.getName())
-                .materialUnit(material.getMaterialUnit())
-                .baseQuantity(material.getBaseQuantity())
-                .leadTime(material.getLeadTime())
-                .deleted(false)
-                .materialCategoryId(category.getId())
-                .build();
-
-        MaterialEvent event = MaterialEvent.builder()
+        // 이벤트 발행 - 전체 MaterialEvent 객체 저장
+        MaterialEvent materialEvent = MaterialEvent.builder()
                 .eventId(UUID.randomUUID().toString())
                 .eventType("MaterialCreated")
                 .version(material.getVersion())
                 .occurredAt(OffsetDateTime.now().toString())
-                .payload(payload)
+                .payload(MaterialEvent.Payload.builder()
+                        .materialId(material.getId())
+                        .materialCode(material.getMaterialCode())
+                        .name(material.getName())
+                        .materialUnit(material.getMaterialUnit())
+                        .baseQuantity(material.getBaseQuantity())
+                        .standardQuantity(material.getStandardQuantity() != null ? material.getStandardQuantity() : 1)
+                        .leadTime(material.getLeadTime())
+                        .deleted(false)
+                        .materialCategoryId(category.getId())
+                        .standardCost(material.getStandardCost())
+                        .build())
                 .build();
 
         outboxService.saveEvent(
@@ -134,7 +134,7 @@ public class MaterialService {
                 material.getId(),
                 "MaterialCreated",
                 material.getVersion(),
-                event.getPayload() // event 전체가 아닌 payload만 전달
+                materialEvent
         );
 
         return new MaterialResponseDTO(material);
@@ -171,24 +171,24 @@ public class MaterialService {
         materialRepository.flush();
 
 
-        // 이벤트 발행 - 부품 이벤트와 같은 방식으로 수정
-        MaterialEvent.Payload payload = MaterialEvent.Payload.builder()
-                .materialId(material.getId())
-                .materialCode(material.getMaterialCode())
-                .name(material.getName())
-                .materialUnit(material.getMaterialUnit())
-                .baseQuantity(material.getBaseQuantity())
-                .leadTime(material.getLeadTime())
-                .deleted(false)
-                .materialCategoryId(material.getMaterialCategory().getId())
-                .build();
-
-        MaterialEvent event = MaterialEvent.builder()
+        // 이벤트 발행 - 전체 MaterialEvent 객체 저장
+        MaterialEvent materialEvent = MaterialEvent.builder()
                 .eventId(UUID.randomUUID().toString())
                 .eventType("MaterialUpdated")
                 .version(material.getVersion())
                 .occurredAt(OffsetDateTime.now().toString())
-                .payload(payload)
+                .payload(MaterialEvent.Payload.builder()
+                        .materialId(material.getId())
+                        .materialCode(material.getMaterialCode())
+                        .name(material.getName())
+                        .materialUnit(material.getMaterialUnit())
+                        .baseQuantity(material.getBaseQuantity())
+                        .standardQuantity(material.getStandardQuantity() != null ? material.getStandardQuantity() : 1)
+                        .leadTime(material.getLeadTime())
+                        .deleted(false)
+                        .materialCategoryId(material.getMaterialCategory().getId())
+                        .standardCost(material.getStandardCost())
+                        .build())
                 .build();
 
         outboxService.saveEvent(
@@ -196,7 +196,7 @@ public class MaterialService {
                 material.getId(),
                 "MaterialUpdated",
                 material.getVersion(),
-                event.getPayload() // event 전체가 아닌 payload만 전달
+                materialEvent
         );
 
         return new MaterialResponseDTO(material);
@@ -208,24 +208,24 @@ public class MaterialService {
         Material material = materialRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.MATERIAL_NOT_FOUND));
 
-        // 이벤트 발행 (삭제 전에) - 부품 이벤트와 같은 방식으로 수정
-        MaterialEvent.Payload payload = MaterialEvent.Payload.builder()
-                .materialId(material.getId())
-                .materialCode(material.getMaterialCode())
-                .name(material.getName())
-                .materialUnit(material.getMaterialUnit())
-                .baseQuantity(material.getBaseQuantity())
-                .leadTime(material.getLeadTime())
-                .deleted(true)
-                .materialCategoryId(material.getMaterialCategory().getId())
-                .build();
-
-        MaterialEvent event = MaterialEvent.builder()
+        // 이벤트 발행 (삭제 전에) - 전체 MaterialEvent 객체 저장
+        MaterialEvent materialEvent = MaterialEvent.builder()
                 .eventId(UUID.randomUUID().toString())
                 .eventType("MaterialDeleted")
                 .version(material.getVersion())
                 .occurredAt(OffsetDateTime.now().toString())
-                .payload(payload)
+                .payload(MaterialEvent.Payload.builder()
+                        .materialId(material.getId())
+                        .materialCode(material.getMaterialCode())
+                        .name(material.getName())
+                        .materialUnit(material.getMaterialUnit())
+                        .baseQuantity(material.getBaseQuantity())
+                        .standardQuantity(material.getStandardQuantity() != null ? material.getStandardQuantity() : 1)
+                        .leadTime(material.getLeadTime())
+                        .deleted(true)
+                        .materialCategoryId(material.getMaterialCategory().getId())
+                        .standardCost(material.getStandardCost())
+                        .build())
                 .build();
 
         outboxService.saveEvent(
@@ -233,7 +233,7 @@ public class MaterialService {
                 material.getId(),
                 "MaterialDeleted",
                 material.getVersion(),
-                event.getPayload() // event 전체가 아닌 payload만 전달
+                materialEvent
         );
 
         materialRepository.delete(material);

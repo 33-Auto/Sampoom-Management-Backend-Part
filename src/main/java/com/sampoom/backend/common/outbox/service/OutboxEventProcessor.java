@@ -47,14 +47,7 @@ public class OutboxEventProcessor {
             // AggregateType에 따라 DTO 역질렬화 및 토픽/이벤트 구성
             switch (outbox.getAggregateType()) {
                 case "PART":
-                    PartEvent.Payload partPayload = objectMapper.readValue(outbox.getPayload(), PartEvent.Payload.class);
-                    eventToSend = PartEvent.builder()
-                            .eventId(outbox.getEventId())
-                            .eventType(outbox.getEventType())
-                            .version(outbox.getVersion())
-                            .occurredAt(outbox.getOccurredAt().toString())
-                            .payload(partPayload)
-                            .build();
+                    eventToSend = objectMapper.readValue(outbox.getPayload(), PartEvent.class);
                     topicName = TOPIC_PART; // Part 토픽
                     break;
 
@@ -96,14 +89,8 @@ public class OutboxEventProcessor {
                     break;
 
                 case "MATERIAL":
-                    com.sampoom.backend.api.material.event.dto.MaterialEvent.Payload materialPayload = objectMapper.readValue(outbox.getPayload(), com.sampoom.backend.api.material.event.dto.MaterialEvent.Payload.class);
-                    eventToSend = com.sampoom.backend.api.material.event.dto.MaterialEvent.builder()
-                            .eventId(outbox.getEventId())
-                            .eventType(outbox.getEventType())
-                            .version(outbox.getVersion())
-                            .occurredAt(outbox.getOccurredAt().toString())
-                            .payload(materialPayload)
-                            .build();
+                    // 전체 MaterialEvent 객체를 직접 역직렬화
+                    eventToSend = objectMapper.readValue(outbox.getPayload(), com.sampoom.backend.api.material.event.dto.MaterialEvent.class);
                     topicName = TOPIC_MATERIAL;
                     break;
 

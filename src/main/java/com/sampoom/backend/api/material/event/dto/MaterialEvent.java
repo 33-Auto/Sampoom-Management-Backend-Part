@@ -27,6 +27,7 @@ public class MaterialEvent {
         private String name;
         private String materialUnit;
         private Integer baseQuantity;
+        private Integer standardQuantity;  // 기준 수량 추가
         private Integer leadTime;
         private boolean deleted;
         private Long materialCategoryId;

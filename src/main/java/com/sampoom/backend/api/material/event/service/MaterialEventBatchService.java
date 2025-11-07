@@ -29,19 +29,24 @@ public class MaterialEventBatchService {
         List<Material> materials = materialRepository.findAll();
         for (Material material : materials) {
             try {
-                // MaterialEvent.Payload 생성 (필요에 따라 필드 매핑)
-                MaterialEvent.Payload payload = MaterialEvent.Payload.builder()
-                        .materialId(material.getId())
-                        .materialCode(material.getMaterialCode())
-                        .name(material.getName())
-                        .materialUnit(material.getMaterialUnit())
-                        .baseQuantity(material.getBaseQuantity())
-                        .leadTime(material.getLeadTime())
-                        .standardCost(material.getStandardCost())
-                        .deleted(false)
-                        .materialCategoryId(material.getMaterialCategory().getId())
-
-                        // ... 필요한 필드 추가 ...
+                // 전체 MaterialEvent 객체 생성
+                MaterialEvent materialEvent = MaterialEvent.builder()
+                        .eventId(java.util.UUID.randomUUID().toString())
+                        .eventType("MaterialCreated")
+                        .version(material.getVersion())
+                        .occurredAt(java.time.OffsetDateTime.now().toString())
+                        .payload(MaterialEvent.Payload.builder()
+                                .materialId(material.getId())
+                                .materialCode(material.getMaterialCode())
+                                .name(material.getName())
+                                .materialUnit(material.getMaterialUnit())
+                                .baseQuantity(material.getBaseQuantity())
+                                .standardQuantity(material.getStandardQuantity() != null ? material.getStandardQuantity() : 1)
+                                .leadTime(material.getLeadTime())
+                                .standardCost(material.getStandardCost())
+                                .deleted(false)
+                                .materialCategoryId(material.getMaterialCategory().getId())
+                                .build())
                         .build();
 
                 // Outbox 엔티티 생성
@@ -49,10 +54,10 @@ public class MaterialEventBatchService {
                         .aggregateType("MATERIAL")
                         .aggregateId(material.getId())
                         .eventType("MaterialCreated")
-                        .payload(objectMapper.writeValueAsString(payload))
+                        .payload(objectMapper.writeValueAsString(materialEvent))
                         .version(material.getVersion())
                         .occurredAt(OffsetDateTime.now())
-                        .status(OutboxStatus.READY) // 상태 필드명에 맞게 수정
+                        .status(OutboxStatus.READY)
                         .build();
 
                 outboxRepository.save(outbox);

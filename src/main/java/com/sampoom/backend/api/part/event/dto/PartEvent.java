@@ -24,8 +24,9 @@ public class PartEvent {
         private String name;
 
         private String partUnit;
-        private Integer baseQuantity;
+        private Integer baseQuantity;  // 안전재고
         private Integer leadTime;
+        private Integer standardQuantity;  // 기준수량
 
         private String status;
         private Boolean deleted;
