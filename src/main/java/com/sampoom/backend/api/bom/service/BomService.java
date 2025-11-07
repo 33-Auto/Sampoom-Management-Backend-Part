@@ -247,6 +247,7 @@ public class BomService {
                 .status(bom.getStatus().name())
                 .complexity(bom.getComplexity().name())
                 .deleted(false)
+                .totalCost(bom.getTotalCost() != null ? bom.getTotalCost().doubleValue() : 0.0)
                 .materials(bom.getMaterials().stream()
                         .map(m -> BomEvent.Payload.MaterialInfo.builder()
                                 .materialId(m.getMaterial().getId())
@@ -284,6 +285,7 @@ public class BomService {
                 .status("DELETED")
                 .complexity(bom.getComplexity().name())
                 .deleted(true)
+                .totalCost(0.0)
                 .materials(Collections.emptyList())
                 .build();
 
