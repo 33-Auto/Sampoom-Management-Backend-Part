@@ -89,14 +89,8 @@ public class OutboxEventProcessor {
                     break;
 
                 case "MATERIAL":
-                    com.sampoom.backend.api.material.event.dto.MaterialEvent.Payload materialPayload = objectMapper.readValue(outbox.getPayload(), com.sampoom.backend.api.material.event.dto.MaterialEvent.Payload.class);
-                    eventToSend = com.sampoom.backend.api.material.event.dto.MaterialEvent.builder()
-                            .eventId(outbox.getEventId())
-                            .eventType(outbox.getEventType())
-                            .version(outbox.getVersion())
-                            .occurredAt(outbox.getOccurredAt().toString())
-                            .payload(materialPayload)
-                            .build();
+                    // 전체 MaterialEvent 객체를 직접 역직렬화
+                    eventToSend = objectMapper.readValue(outbox.getPayload(), com.sampoom.backend.api.material.event.dto.MaterialEvent.class);
                     topicName = TOPIC_MATERIAL;
                     break;
 
