@@ -203,7 +203,7 @@ public class PartService {
 
                 part.changeGroup(newGroup); // 엔티티에 추가할 메서드
 
-                // 코드 재생성
+                // 코드 재생성 (개선된 버전 사용)
                 String newCode = generateNextPartCode(newGroup.getId());
                 part.changeCode(newCode);
             }
@@ -353,30 +353,42 @@ public class PartService {
     }
 
 
-    // 코드 생성
+    // 코드 생성 (개선된 버전)
     @Transactional(readOnly = true)
     public String generateNextPartCode(Long groupId) {
-
         PartGroup group = partGroupRepository.findById(groupId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.GROUP_NOT_FOUND));
 
         String categoryCode = group.getCategory().getCode(); // ENG, TRM 등
         String groupCode = String.format("%02d", group.getId()); // 그룹 ID 두 자리로 포맷
 
-        // 최신 부품 코드 조회 (code 순 정렬 기준)
-        Part latest = partRepository.findTopByPartGroupIdOrderByCodeDesc(groupId);
+        // 해당 그룹의 모든 부품 코드를 가져와서 최대 시퀀스 번호 찾기
+        String codePrefix = categoryCode + "-" + groupCode + "-";
 
-        int nextSeq = 1;
-        if (latest != null && latest.getCode() != null) {
-            String[] parts = latest.getCode().split("-");
-            if (parts.length == 3) {
-                try {
-                    nextSeq = Integer.parseInt(parts[2]) + 1;
-                } catch (NumberFormatException ignored) {}
+        // Repository에서 해당 그룹의 모든 부품을 가져와서 직접 최대값 계산
+        Page<Part> parts = partRepository.findByPartGroupId(groupId, PageRequest.of(0, Integer.MAX_VALUE));
+
+        int maxSeq = 0;
+        for (Part part : parts.getContent()) {
+            if (part.getCode() != null && part.getCode().startsWith(codePrefix)) {
+                String[] codeParts = part.getCode().split("-");
+                if (codeParts.length == 3) {
+                    try {
+                        int seq = Integer.parseInt(codeParts[2]);
+                        maxSeq = Math.max(maxSeq, seq);
+                    } catch (NumberFormatException ignored) {
+                        // 잘못된 형식의 코드는 무시
+                    }
+                }
             }
         }
 
-        return String.format("%s-%s-%03d", categoryCode, groupCode, nextSeq);
+        int nextSeq = maxSeq + 1;
+        String newCode = String.format("%s-%s-%03d", categoryCode, groupCode, nextSeq);
+
+        log.debug("그룹 {} 코드 생성: 현재 최대 시퀀스={}, 새 코드={}", groupId, maxSeq, newCode);
+
+        return newCode;
     }
 
     @Transactional
