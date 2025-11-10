@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Process", description = "공정 API")
@@ -25,6 +26,7 @@ public class ProcessController {
 
     @Operation(summary = "공정 등록", description = "부품, 버전, 상태 및 공정 순서(여러 개)를 등록합니다.")
     @PostMapping
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')") // 관리자만 수정 가능
     public ResponseEntity<ApiResponse<ProcessResponseDTO>> create(@Valid @RequestBody ProcessCreateRequestDTO request) {
         ProcessResponseDTO response = processService.create(request);
         return ApiResponse.success(SuccessStatus.CREATED, response);
@@ -55,6 +57,7 @@ public class ProcessController {
 
     @Operation(summary = "공정 수정",description = "부품(partId) 변경 및 공정 스텝(전량 교체), 버전, 상태를 수정합니다.")
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')") // 관리자만 수정 가능
     public ResponseEntity<ApiResponse<ProcessResponseDTO>> update(
             @PathVariable Long id,
             @Valid @RequestBody ProcessUpdateRequestDTO request
@@ -65,6 +68,7 @@ public class ProcessController {
 
     @Operation(summary = "공정 삭제", description = "공정을 삭제합니다.")
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')") // 관리자만 수정 가능
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         processService.delete(id);
         return ApiResponse.success_only(SuccessStatus.OK);

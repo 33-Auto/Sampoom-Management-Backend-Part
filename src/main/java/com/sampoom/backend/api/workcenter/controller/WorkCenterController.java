@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "WorkCenter", description = "작업장 API")
@@ -29,6 +30,7 @@ public class WorkCenterController {
 
     @Operation(summary = "작업장 등록", description = "작업장명, 유형, 상태, 일일 가동시간, 효율성, 시간당비용을 입력하여 작업장을 등록합니다.")
     @PostMapping
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')") // 관리자만 수정 가능
     public ResponseEntity<ApiResponse<WorkCenterResponseDTO>> create(@Valid @RequestBody WorkCenterCreateRequestDTO request) {
         WorkCenterResponseDTO response = workCenterService.create(request);
         return ApiResponse.success(SuccessStatus.WORKCENTER_CREATE_SUCCESS, response);
@@ -56,6 +58,7 @@ public class WorkCenterController {
 
     @Operation(summary = "작업장 수정", description = "부분 수정(PATCH)")
     @PatchMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')") // 관리자만 수정 가능
     public ResponseEntity<ApiResponse<WorkCenterResponseDTO>> update(
             @PathVariable Long id,
             @RequestBody @Valid WorkCenterUpdateRequestDTO request
@@ -66,6 +69,7 @@ public class WorkCenterController {
 
     @Operation(summary = "작업장 삭제", description = "작업장 삭제")
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')") // 관리자만 수정 가능
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         workCenterService.delete(id);
         return ApiResponse.success(SuccessStatus.WORKCENTER_DELETE_SUCCESS, null);
