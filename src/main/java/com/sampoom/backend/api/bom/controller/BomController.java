@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "BOM", description = "BOM API")
@@ -26,6 +27,7 @@ public class BomController {
 
     @Operation(summary = "BOM 추가", description = "새로운 BOM을 등록합니다.")
     @PostMapping
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')") // 관리자만 수정 가능
     public ResponseEntity<ApiResponse<BomResponseDTO>> createOrUpdateBom(@Valid @RequestBody BomRequestDTO bomRequestDTO) {
         return ApiResponse.success(SuccessStatus.CREATED, bomService.createBom(bomRequestDTO));
     }
@@ -51,6 +53,7 @@ public class BomController {
 
     @Operation(summary = "BOM 수정", description = "특정 BOM 정보를 수정합니다.")
     @PutMapping("/{bomId}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')") // 관리자만 수정 가능
     public ResponseEntity<ApiResponse<BomResponseDTO>> updateBom(
             @PathVariable Long bomId,
             @Valid @RequestBody BomRequestDTO bomRequestDTO) {
@@ -59,6 +62,7 @@ public class BomController {
 
     @Operation(summary = "BOM 삭제", description = "특정 BOM을 삭제합니다.")
     @DeleteMapping("/{bomId}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')") // 관리자만 수정 가능
     public ResponseEntity<ApiResponse<Void>> deleteBom(@PathVariable Long bomId) {
         bomService.deleteBom(bomId);
         return ApiResponse.success_only(SuccessStatus.OK);

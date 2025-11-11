@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -58,6 +59,7 @@ public class MaterialController {
 
     @Operation(summary = "자재 수정", description = "기존 자재 정보를 수정합니다.")
     @PutMapping("/{materialId}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')") // 관리자만 수정 가능
     public ResponseEntity<ApiResponse<MaterialResponseDTO>> updateMaterial(
             @PathVariable("materialId") Long id,
             @Valid @RequestBody MaterialRequestDTO materialRequestDTO) {
@@ -75,6 +77,7 @@ public class MaterialController {
 
     @Operation(summary = "자재 삭제", description = "자재를 삭제합니다.")
     @DeleteMapping("/{materialId}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')") // 관리자만 수정 가능
     public ResponseEntity<ApiResponse<Void>> deleteMaterial(@PathVariable("materialId") Long id) {
         materialService.deleteMaterial(id);
         return ApiResponse.success_only(SuccessStatus.OK);
