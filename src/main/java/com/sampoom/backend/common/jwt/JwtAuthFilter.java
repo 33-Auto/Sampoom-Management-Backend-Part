@@ -1,6 +1,7 @@
 package com.sampoom.backend.common.jwt;
 
 import com.sampoom.backend.common.entity.Role;
+import com.sampoom.backend.common.entity.Workspace;
 import com.sampoom.backend.common.exception.CustomAuthenticationException;
 import com.sampoom.backend.common.response.ErrorStatus;
 import com.sampoom.backend.common.security.CustomAuthEntryPoint;
@@ -12,12 +13,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -40,13 +43,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
         try {
             String accessToken = jwtProvider.resolveAccessToken(request);
-            if (accessToken == null) {
+            if (accessToken == null || accessToken.isBlank()) {
                 filterChain.doFilter(request, response);
                 return;
             }
-            if (accessToken.isBlank()) {
-                throw new CustomAuthenticationException(ErrorStatus.NULL_BLANK_TOKEN);
-            }
+
             Claims claims = jwtProvider.parse(accessToken);
 
             // 토큰 타입 검증
@@ -87,30 +88,38 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             // 토큰에서 userId, role 가져오기
             String userId = claims.getSubject();
-            String roleClaim = claims.get("role", String.class);
-            if (userId == null || userId.isBlank() || roleClaim == null || roleClaim.isBlank()) {
-                SecurityContextHolder.clearContext();
-                filterChain.doFilter(request, response);
-                return;
+            String roleStr = claims.get("role", String.class);
+            String workspaceStr = claims.get("workspace", String.class);
+            if (userId == null
+                    || userId.isBlank()
+                    || roleStr == null
+                    || roleStr.isBlank()
+                    || workspaceStr == null
+                    || workspaceStr.isBlank()
+            ) {
+                throw new CustomAuthenticationException(ErrorStatus.INVALID_TOKEN);
             }
-            // 권한 파싱 (문자열 -> Enum)
+
             Role role;
+            Workspace workspace;
             try {
-                role = Role.valueOf(roleClaim);
+                role = Role.valueOf(roleStr);
+                workspace = Workspace.valueOf(workspaceStr);
             } catch (IllegalArgumentException ex) {
-                throw new CustomAuthenticationException(ErrorStatus.INVALID_TOKEN_ROLE);
+                throw new CustomAuthenticationException(ErrorStatus.INVALID_TOKEN);
             }
 
             // 권한 매핑 (Enum Role → Security 권한명)
-            String authority;
-            switch (role) {
-                case USER -> authority = "ROLE_USER";
-                case ADMIN -> authority = "ROLE_ADMIN";
-                default -> authority = "ROLE_" + role.name();
-            }
+            String roleAuthority = "ROLE_" + role.name();
+            String workspaceAuthority = "ROLE_" + workspace.name();
+
+            // GrantedAuthority 리스트 생성
+            List<GrantedAuthority> authorities = new ArrayList<>();
+            authorities.add(new SimpleGrantedAuthority(roleAuthority));
+            authorities.add(new SimpleGrantedAuthority(workspaceAuthority));
 
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    userId, null, List.of(new SimpleGrantedAuthority(authority))
+                    userId, null, authorities
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
             filterChain.doFilter(request, response);
