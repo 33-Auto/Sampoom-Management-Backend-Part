@@ -37,7 +37,7 @@ public enum ErrorStatus {
     DATA_CONFLICT(HttpStatus.CONFLICT, "다른 사용자에 의해 데이터가 수정되었습니다.", 30902),
 
     // 400 BAD_REQUEST
-    SHORT_PUBLIC_KEY(HttpStatus.BAD_REQUEST, "서명용 공개키의 길이가 짧습니다. 적어도 2048비트 이상으로 설정하세요.", 12401),
+    SHORT_PUBLIC_KEY(HttpStatus.BAD_REQUEST, "서명 공개키의 길이가 짧습니다. 적어도 2048비트 이상으로 설정하세요.", 12401),
     NULL_BLANK_TOKEN(HttpStatus.BAD_REQUEST, "토큰 값은 Null 또는 공백이면 안됩니다.", 12400),
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "유효하지 않은 입력 값입니다.", 11402),
     INVALID_WORKSPACE_TYPE(HttpStatus.BAD_REQUEST, "유효하지 않은 조직(workspace) 타입입니다.", 11401),
@@ -75,11 +75,6 @@ public enum ErrorStatus {
     FAILED_CONNECTION_KAFKA(HttpStatus.INTERNAL_SERVER_ERROR,"Kafka 브로커 연결 또는 통신에 실패했습니다.",10503),
     EVENT_PROCESSING_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "Kafka 이벤트 처리 중 예외가 발생했습니다.",10504),
     OUTBOX_SERIALIZATION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR,"Outbox 직렬화에 실패했습니다.",10505),
-
-
-    TOO_SHORT_SECRET_KEY(HttpStatus.BAD_REQUEST, "서명용 비밀키의 길이가 짧습니다. 적어도 32바이트 이상으로 설정하세요.", 12402),
-    NULL_TOKEN(HttpStatus.BAD_REQUEST, "토큰 값은 Null이면 안됩니다.", 12401),
-    BLANK_TOKEN(HttpStatus.BAD_REQUEST, "토큰 값은 공백이면 안됩니다.", 12400),
     ;
 
     private final HttpStatus httpStatus;
